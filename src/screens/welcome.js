@@ -29,27 +29,27 @@ const styles=StyleSheet.create({
     titleText: {
         color: '#007788',
         fontFamily: 'PressStart',
-        fontSize: 52,
+        fontSize: 42,
         position: 'absolute',
-        top: '25%'        
+        top: '30%'        
     }, 
     button: {
-        padding: 19,
+        padding: 10,
         backgroundColor: '#007788',
         //position: 'absolute', // absolute causes touchable opacity to not work in android!!
         marginTop: 520,
         borderRadius: 15
     },
     buttonText: {
-        fontSize: 32,
+        fontSize: 22,
         fontFamily: 'RowdiesRegular',
         color: '#f6f6f6'
     }, 
     image: {
-        width: 250,
-        height: 250,
+        width: 160,
+        height: 160,
         position: 'absolute',
-        top: '34%'
+        top: '40%'
     }
 })
     

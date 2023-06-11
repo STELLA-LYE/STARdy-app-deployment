@@ -102,6 +102,7 @@ export default Friends = () => {
                 </TouchableOpacity>
 
               </View>
+              
               <View style={[styles.cardContent, styles.tagsContent]}>{renderTags(item)}</View>
             </TouchableOpacity>
           )

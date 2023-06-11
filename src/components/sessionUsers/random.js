@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react'
+import React, { Component, useEffect, useState, useCallback } from 'react'
 import {
   StyleSheet,
   Text,
@@ -8,117 +8,174 @@ import {
   Alert,
   TextInput,
   FlatList,
+  AppState,
 } from 'react-native'
-//import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'; 
+
+import { useFocusEffect } from '@react-navigation/native';
+
+//firebase 
+import { storage } from '../../../config';
+import { ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage';
+import { db, authentication } from '../../../config';
+
+import { doc, getDoc, get, where, Filter, getDocs, query, collection, setDoc} from "firebase/firestore";
+
+export default function Random(props) {
+
+  const [users, setUsers] = useState([])
 
 
-export default Random = () => {
+  const[name, setName] = useState('')
+  const[major, setMajor] = useState('')
+  const[year, setYear] = useState('')
+  const[gender, setGender] = useState('')
+  const[photoURL, setPhotoURL] = useState(null);
+  const [userID, setUserID] = useState(authentication.currentUser.uid);
+  const [isRequesting, setIsRequesting] = useState(null);
+  const [matched, setMatched] = useState(false);
 
-   showAlert = () => Alert.alert('Request', 'Sending your request!' )
+  const docRef = doc(db, "users", authentication.currentUser.email);
 
-  const optionList = [
-    {
-      id: 1,
-      color: '#007788',
-      icon: 'https://bootdey.com/img/Content/avatar/avatar1.png',
-      name: 'Bot',
-      tags: ['NIL', 'unmatched'],
-    },
-    {
-      id: 2,
-      color: '#007788',
-      icon: 'https://bootdey.com/img/Content/avatar/avatar6.png',
-      name: 'User 1',
-      tags: ['M', 'unmatched'],
-    },
-    {
-      id: 3,
-      color: '#007788',
-      icon: 'https://bootdey.com/img/Content/avatar/avatar3.png',
-      name: 'User 2',
-      tags: ['F', 'unmatched'],
-    },
-    {
-      id: 4,
-      color: '#007788',
-      icon: 'https://bootdey.com/img/Content/avatar/avatar8.png',
-      name: 'User 3',
-      tags: ['F', 'unmatched'],
-    },
-    {
-      id: 5,
-      color: '#007788',
-      icon: 'https://bootdey.com/img/Content/avatar/avatar5.png',
-      name: 'User 4',
-      tags: ['M', 'unmatched'],
-    },
-    {
-      id: 6,
-      color: '#007788',
-      icon: 'https://bootdey.com/img/Content/avatar/avatar2.png',
-      name: 'User 5',
-      tags: ['M', 'unmatched'],
-    },
-  ]
+  
 
-  const [options, setOptions] = useState(optionList)
-  const [query, setQuery] = useState()
+  // filter 
+  useEffect(() => {
+    const q = query(collection(db, "users"), where("major", ">=", major), where("year", "==", year));
+    getDocs(q)
+        .then((snapshot) => {
+          let users = snapshot.docs.map(doc => {
+              const data = doc.data(); 
+              const id = doc.id; 
+              return { id, ...data }
+          }); 
+          setUsers(users);
+          console.log(users);
+        })
+  },[major, year])
+
+  // retrieve and update
+  useFocusEffect(
+    useCallback(() => {
+      getDoc(docRef)
+      .then((doc) => {
+          setName(doc.get('name'))
+          setMajor(doc.get('major'))
+          setYear(doc.get('year'))
+          setGender(doc.get('gender'))
+          setPhotoURL(doc.get('photoURL'))
+      })
+     }, [])
+
+  )
 
   const cardClickEventListener = item => {
     Alert.alert(item.name)
   }
 
-  const tagClickEventListener = tagName => {
-    if (tagName == 'matched') {
-      Alert.alert('User is already matched, unable to send request!')
-    } else {
-      Alert.alert(tagName)
-    }
-  }
+  // getDoc(docRef)
+  //               .then((doc) => {
+  //                   setName(doc.get('name'))
+  //                   setMajor(doc.get('major'))
+  //                   setYear(doc.get('year'))
+  //                   setGender(doc.get('gender'))
+  //                   setPhotoURL(doc.get('photoURL'))  
+  //                   //console.log(photoURL)
+  //               })
 
-  const renderTags = item => {
-    return item.tags.map((tag, key) => {
-      return (
-        <TouchableOpacity
-          key={key}
-          style={styles.btnColor}
-          onPress={() => tagClickEventListener(tag)}>
-          <Text>{tag}</Text>
-        </TouchableOpacity>
-      )
+  // send request (i.e. data of current user requesting)
+  handleRequest = (item) => {
+    setIsRequesting(item.id);
+    const docRef = doc(db, "requests", item.id, "userRequests", authentication.currentUser.email);
+    setDoc(docRef, {
+      accepted: false,
+      name: name,
+      gender: gender,
+      year: year,
+      major: major,
+      photoURL: photoURL      
     })
   }
 
+  noRequest = (item) => Alert.alert('Already Requested!', `Wait for ${item.name} to accept your request.`)
+  
+  //Frontend for Random 
+
   return (
+
     <View style={styles.container}>
-    
+
+      {/* <TextInput 
+          placeholder='Type Here...'
+  onChange={(search)=> fetchUsers(search)}/> */}
+
+      {/* <TouchableOpacity
+          style={[styles.startbutton]}
+          onPress={fetchUsers()}>
+          <Text style={styles.buttonText}> Start Search </Text>
+      </TouchableOpacity> */}
+
       <FlatList
-        style={styles.notificationList}
-        data={options}
-        keyExtractor={item => {
-          return item.id
-        }}
+        numColumns={1}
+        horizontal= {false}
+        data={users}
+        extraData={users}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
-          return (
-            <TouchableOpacity
-              style={[styles.card, { borderColor: item.color }]}
-              onPress={() => {
-                cardClickEventListener(item)
-              }}>
-              <View style={styles.cardContent}>
-                <Image style={[styles.image, styles.imageContent]} source={{ uri: item.icon }} />
-                <Text style={styles.name}>{item.name}</Text>
+          console.log(item.name + ' ' + item.matched)
+            
 
-                <TouchableOpacity
-                  style={[styles.button, styles.profile]}
-                  onPress={showAlert}>
-                  <Text style={styles.buttonText}>Request</Text>
-                </TouchableOpacity>
+          // if user is noti the current user and user isn't already matched, flat list
+          if (item.id != authentication.currentUser.email && !item.matched) {
+            // const docRef = doc(db, "users", item.id);
+            // getDoc(docRef)
+            // .then((doc) => {
+            //     setMatched(doc.get('matched'))
+            // })
+            
+            return (
+              <TouchableOpacity
+                style={[styles.card, { borderColor:'#007788' }]}
+                onPress={() => {
+                  cardClickEventListener(item)
+                }}>
+               
+                <View style={styles.cardContent}>
+                  <Image style={[styles.image, styles.imageContent]} source={{ uri: item.photoURL }} />
+                  <Text style={styles.name}> {item.name} </Text>
+                  {/* <Text style={styles.about}> {item.gender} </Text> */}
+                </View>
+  
+                <View style={styles.cardSection}>
+                <Text style={styles.about}> {item.gender} </Text>
+                {/* display matched/unmatched status */}
+                {item.matched
+                  ? <Text style={styles.about}> matched </Text>
+                  : <Text style={styles.about}> unmatched </Text>}
+                 
+                <Text style={styles.about}> online </Text>
+                </View>
 
-              </View>
-              <View style={[styles.cardContent, styles.tagsContent]}>{renderTags(item)}</View>
-            </TouchableOpacity>
-          )
+                { (isRequesting == item.id) ? (
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: 'light gray',
+                      ...styles.button,
+                      
+                    }}
+                    onPress={() => noRequest(item)}>
+                    <Text style={styles.buttonText}>Requesting</Text>
+                  </TouchableOpacity>)
+                  :
+                  ( <TouchableOpacity
+                    style={[styles.button, styles.profile]}
+                    onPress={() => handleRequest(item)}>
+                    <Text style={styles.buttonText}>Request</Text>
+                  </TouchableOpacity>
+                  )}
+                
+              </TouchableOpacity> 
+            )
+          }
         }}
       />
     </View>
@@ -181,6 +238,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginLeft: 10,
   },
+  cardSection: {
+    flexDirection: 'row',
+    marginLeft: 60,
+    marginTop: 5, 
+  },
   imageContent: {
     marginTop: -40,
   },
@@ -199,6 +261,12 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     alignSelf: 'center',
   },
+  about: {
+    fontSize: 16,
+    //fontWeight: 'bold',
+    marginLeft: 10,
+    alignSelf: 'center',
+  },
   btnColor: {
     padding: 10,
     borderRadius: 40,
@@ -209,13 +277,23 @@ const styles = StyleSheet.create({
    button: {
     height: 35,
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'centre',
+    alignItems: 'centre',
     borderRadius: 10,
-    width: 80,
+    width: 100,
     marginRight: 20,
-    marginLeft: 20,
+    marginLeft: 250,
     marginTop: 5,
+    //backgroundColor: '#007788'
+  },
+  startbutton: {
+    height: 35,
+    borderRadius: 100,
+    width: 130,
+    marginTop: 5,
+    marginLeft: 10, 
+    backgroundColor: '#007788',
+    
   },
    profile: {
     backgroundColor: '#007788',
@@ -224,6 +302,9 @@ const styles = StyleSheet.create({
     color: '#f6f6f6',
     fontWeight: 'bold',
     textAlign: 'center',
+    marginLeft: 11, 
+    marginTop: 8,
+    
   },
 })
 

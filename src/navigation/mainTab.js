@@ -7,10 +7,12 @@ import Dashboard from '../screens/dashboard';
 import FocusTimer from '../screens/focusTimer';
 import SessionUsers from '../screens/sessionUsers';
 import Stardyroom from '../screens/stardyroom';
+import Chat from '../screens/chat';
 
 import { FontAwesome } from '@expo/vector-icons';
 import { SimpleLineIcons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons'
+import Home from '../screens/home';
 
 
 export default function MainTab() {
@@ -81,7 +83,7 @@ export default function MainTab() {
 
     <MainTab.Screen 
         name='Tasks' 
-        component={Stardyroom} 
+        component={Home} 
         options={{
           tabBarIcon: ({focused}) => (
             <View>

@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from 'react'
+import {React, useState, useEffect, useCallback} from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'; 
 
@@ -6,8 +6,10 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import ProgressBar from './progressBar';
 
-import { db } from '../../../config';
+import { db, authentication } from '../../../config';
 import { doc, getDoc, get, connectFirestoreEmulator} from "firebase/firestore";
+
+import { useFocusEffect } from '@react-navigation/native';
 
 const ProfileCard = ({ nav }) => {
 
@@ -17,37 +19,48 @@ const ProfileCard = ({ nav }) => {
 
     const [image, setImage] = useState(null);
 
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0
-        });
+    // const pickImage = async () => {
+    //     let result = await ImagePicker.launchImageLibraryAsync({
+    //     mediaTypes: ImagePicker.MediaTypeOptions.All,
+    //     allowsEditing: true,
+    //     aspect: [4, 3],
+    //     quality: 0
+    //     });
 
-        if (!result.canceled) {
-        setImage(result.assets[0].uri);
-        } 
-    };
+    //     if (!result.canceled) {
+    //     setImage(result.assets[0].uri);
+    //     } 
+    // };
 
-    const[name, setName] = useState('Ariella Callista')
-    const[major, setMajor] = useState('Computer Science')
-    const[year, setYear] = useState('Year 2')
-    const[gender, setGender] = useState('F')
+    const[name, setName] = useState('')
+    const[major, setMajor] = useState('')
+    const[year, setYear] = useState('')
+    const[gender, setGender] = useState('')
+    const [photoURL, setPhotoURL] = useState(null);
+    const [updated, setUpdated] = useState(false);
 
-    const docRef = doc(db, "users", "user");
+    const docRef = doc(db, "users", authentication.currentUser.email);
 
-    getDoc(docRef)
-        .then((doc) => {
-            setName(doc.get('name'))
-            setMajor(doc.get('major'))
-            setYear(doc.get('year'))
-            setGender(doc.get('gender'))
-            // console.log(doc.get('name'));
-            // console.log(doc.data(), doc.id)
-        })   
+    useFocusEffect(
+        useCallback(() => {
+            getDoc(docRef)
+                .then((doc) => {
+                    setName(doc.get('name'))
+                    setMajor(doc.get('major'))
+                    setYear(doc.get('year'))
+                    setGender(doc.get('gender'))
+                    setPhotoURL(doc.get('photoURL'))  
+                    //console.log(photoURL)
+                    console.log(Date.now())
+                })    
+         }, [])
+    )
+     
+    
 
     return (
+
+       
         
         <View style={{
             height: 190,
@@ -77,9 +90,10 @@ const ProfileCard = ({ nav }) => {
                     borderRadius: 90 /2,
                    
                 }}>
-                    <TouchableOpacity onPress={pickImage}>
+                    <TouchableOpacity >
                         <FontAwesome name='user-circle-o' size={75} color='#007788' />
-                        <Image source={{uri: image}} style={{
+                        
+                        <Image source={{uri: photoURL}} style={{
                             width: 75,
                             height: 75,
                             borderRadius: 75 /2,

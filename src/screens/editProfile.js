@@ -6,8 +6,14 @@ import MainTab from '../navigation/mainTab';
 
 import { FontAwesome } from '@expo/vector-icons';
 
-import { doc, setDoc, addDoc, collection} from "firebase/firestore"; 
+import { doc, setDoc, addDoc, collection, getDoc } from "firebase/firestore"; 
 import { db } from '../../config';
+import { authentication } from '../../config';
+
+import * as ImagePicker from 'expo-image-picker';
+
+import { Feather } from '@expo/vector-icons';
+import { saveUserProfileImage } from '../services/user';
 
 
 export default function EditProfile({navigation}) {
@@ -16,15 +22,19 @@ export default function EditProfile({navigation}) {
   const [gender, setGender] = useState(''); 
   const [major, setMajor] = useState(''); 
   const [year, setYear] = useState(''); 
+  const [photoURL, setPhotoURL] = useState('');
 
+  const [lastPhotoUpdatedAt, setLastPhotoUpdatedAt] = useState(null);
 
-  const pressHandler = () => {
-    setDoc(doc(db, "users", "user"), {
+  //submit changes
+  const handleSubmit = () => {
+    setDoc(doc(db, "users", authentication.currentUser.email), {
       name: name,
       gender: gender,
       major: major,
       year: year,
-    }).then(() => {
+      userID: authentication.currentUser.uid
+    }, { merge: true }).then(() => {
       // data saved successfully
       console.log('data submitted');
     }).catch((error) => {
@@ -34,34 +44,77 @@ export default function EditProfile({navigation}) {
     navigation.navigate('Main Tab');
   }
 
+  // upload profile image
+  const chooseImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1
+    })
 
-return (
+    // console.log(result);
+    console.log(result.assets[0].uri);
 
-  <View style={styles.container}>
-    
+    if (!result.canceled) {
+      setLastPhotoUpdatedAt(Date.now());
+      // save photo to storage and generate downloadURL to be saved in firestore
+      saveUserProfileImage(result.assets[0].uri) 
+    }
+  }
+
+  // update photoURL
+  useEffect(() => {
+    const docRef = doc(db, "users", authentication.currentUser.email);
+    getDoc(docRef)
+    .then((doc) => {
+        setPhotoURL(doc.get('photoURL'))  
+        console.log(photoURL)
+    }) 
+
+  }, [lastPhotoUpdatedAt])
   
+
+// frontend
+return (
+  
+  <View style={styles.container}>
     <View style={{
       marginTop: -30
     }}>
 
-    <TouchableOpacity>
-      <View style={{
+    <TouchableOpacity 
+      style={{
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: -10,}}
+      onPress={chooseImage}  
+    >
+      {/* <View style={{
         flexDirection: 'column',
         justifyContent: 'center',
         ...styles.logo
-      }}>
-        <Text style={{
+      }}> */}
+      <Image
+        style={{
+          //flexDirection: 'column',
+          //justifyContent: 'center',
+          position: 'absolute',
+          ...styles.logo}}  
+        source={{ uri: photoURL }} />
+        {/* <Text style={{
           color: 'white',
           fontSize: 15
-        }}>Upload Image</Text>
-
-      </View>
+        }}>Upload Image</Text> */}
+        <View style={styles.imageOverlay} />
+        <Feather name='camera' size={26} color='white' />
+      {/* </View> */}
       {/* <FontAwesome name='user-circle-o' size={90} color='#007788' />   */}
     </TouchableOpacity>
     </View>
 
     <View style={{
-      height: 25
+      height: 55
     }}>
 
     </View>
@@ -142,16 +195,12 @@ return (
       {/* <FlatButton text='Sign Up' />
       <FlatButton onPress={create}></FlatButton> */}
 
-      <TouchableOpacity onPress={pressHandler}>
+      <TouchableOpacity onPress={handleSubmit}>
         <View style={styles.button}>
           <Text style={styles.buttonText}>Submit</Text>
         </View>
       </TouchableOpacity>
     </View>
-    
-
-    
-  
   </View>
 );
 }
@@ -178,9 +227,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 100 / 2,
-    backgroundColor: '#007788', 
-    alignItems: 'center',
-    marginBottom: 20,
+    //backgroundColor: '#007788', 
+    //alignItems: 'center',
+    //marginBottom: 20,
   },
   button: {
     borderRadius: 4,
@@ -200,6 +249,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
   },
+  imageOverlay: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    ...StyleSheet.absoluteFill
+
+  }
+  
 });
 
 const pickerSelectStyles = StyleSheet.create({

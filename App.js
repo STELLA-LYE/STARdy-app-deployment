@@ -9,6 +9,7 @@ import Notes from './src/screens/notes';
 import Encouragement from './src/screens/encouragement';
 import EditProfile from './src/screens/editProfile';
 import Login from './src/screens/login';
+import Chat from './src/screens/chat';
 
 import { Feather } from '@expo/vector-icons';
 
@@ -52,12 +53,24 @@ export default function App() {
         })}>
           <Stack.Screen name='Welcome' component={Welcome} options={{ headerShown: false }}/>
           <Stack.Screen name='Login' component={Login} options={{ headerShown: false }}/>
-          <Stack.Screen name='profile' component={Profile} options={{ headerShown: false }}/>
+          <Stack.Screen name='Profile' component={Profile} options={{ headerShown: false }}/>
           <Stack.Screen name='Main Tab' component={MainTab} options={{ headerShown: false }}/>
           <Stack.Screen name='Notes' component={Notes} />
           <Stack.Screen name='To Do List' component={Todo} />
           <Stack.Screen name='Encouragement Notes!' component={Encouragement} /> 
           <Stack.Screen name='Edit Profile' component={EditProfile} /> 
+          <Stack.Screen
+               name='Chat'
+               component={Chat}
+               options={({route}) => ({
+                headerBackVisible:false,
+                title:route.params.name,
+                headerTitleStyle:{fontWeight:'bold'},
+                headerTitleAlign:'center'
+
+
+               })}
+               />
         </Stack.Navigator>
       </NavigationContainer>
     )
