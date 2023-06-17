@@ -6,7 +6,8 @@ import { Entypo } from '@expo/vector-icons';
 import SearchBar from '../components/dashboard/notes/searchBar';
 import NotePage from '../components/dashboard/notes/notePage';
 
-import { useNotes } from '../context/noteProvider';
+import { useNotes } from '../context/noteProvider'
+import { authentication } from '../../config';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NoteInputModal from '../components/dashboard/notes/noteInputModal';
@@ -18,8 +19,9 @@ const Notes = ({navigation}) => {
 
   const [search, setSearch] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const {notes, setNotes} = useNotes();
-
+  // const {notes, setNotes} = useNotes();
+  const [notes, setNotes] = useState([])
+  
 
   const addNotes = () => {
     setModalVisible(true);
@@ -29,12 +31,21 @@ const Notes = ({navigation}) => {
     const note = {id: Date.now(), title, description, time: Date.now() }
     const updatedNotes = [...notes, note];
     setNotes(updatedNotes);
-    await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes))
+    await AsyncStorage.setItem(authentication.currentUser.uid + '/notes', JSON.stringify(updatedNotes))
   }
 
   const openNote = (note) => {
     navigation.navigate('NoteDetail', {note})
   }
+
+  const findNotes = async () => {
+    const result = await AsyncStorage.getItem(authentication.currentUser.uid + '/notes');
+    if(result !== null) setNotes(JSON.parse(result))
+  }
+
+  useEffect(() => {
+    findNotes()
+  }, [])
 
 
   return (
@@ -66,7 +77,7 @@ const Notes = ({navigation}) => {
           renderItem={({ item }) => <NotePage onPress={() => openNote(item)} item={item} />}
           />
 
-      {!notes.length ? <View style={styles.emptyHeaderContainer}>
+      {/*!notes.length*/ true ? <View style={styles.emptyHeaderContainer}>
         <Text style={styles.emptyHeader}>Click the + button to add notes!</Text>
       </View> : null}
       
@@ -78,7 +89,8 @@ const Notes = ({navigation}) => {
       <NoteInputModal 
         visible={modalVisible} 
         onClose={() => setModalVisible(false)}
-        onSubmit={handleOnSubmit}/>
+        onSubmit={handleOnSubmit}
+        />
     </View>
     
   )

@@ -8,9 +8,12 @@ import FocusTimer from '../screens/focusTimer';
 import SessionUsers from '../screens/sessionUsers';
 import HomeChat from '../screens/homeChat';
 
+
 import { FontAwesome } from '@expo/vector-icons';
 import { SimpleLineIcons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons';
+
 import Home from '../screens/home';
 
 
@@ -23,7 +26,7 @@ export default function MainTab() {
               //labeled={false}
               barStyle={{ 
                 backgroundColor: '#007788',
-                height: 80
+                height: 80,
                 }}
               activeColor='#f6cefc'
               inactiveColor='#f6f6f6'
@@ -35,7 +38,7 @@ export default function MainTab() {
             >
 
       <MainTab.Screen 
-        name='Analytics' 
+        name='Chat' 
         component={HomeChat} 
         options={{
           tabBarIcon: ({focused}) => (
@@ -46,7 +49,7 @@ export default function MainTab() {
               // position: 'absolute',
               // top: -9
             }}>
-              <SimpleLineIcons name='graph' size={27} color={focused ? '#007788' : '#f6f6f6'} />
+              <Ionicons name="chatbox-ellipses" size={27} color={focused ? '#007788' : '#f6f6f6'} />
             </View>
           ),
           tabBarLabelStyle: {
@@ -112,6 +115,11 @@ export default function MainTab() {
       backgroundColor: '#eef1e1',
       alignItems: 'center',
       justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 2,
+      elevation: 2,
     },
     mainTab: {
       position: 'absolute',

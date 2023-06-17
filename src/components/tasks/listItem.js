@@ -1,11 +1,11 @@
-import { Image, StyleSheet, View, TouchableWithoutFeedback } from 'react-native'
+import { Image, StyleSheet, View, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { AppText } from './appText';
 import {MaterialCommunityIcons} from "@expo/vector-icons"
 
 export function ListItem({title, subTitle, image, ImageComponent, onPress}) {
   return (
-        <TouchableWithoutFeedback
+        <TouchableOpacity
         underlayColor='#333' 
         onPress={onPress}
         >
@@ -19,7 +19,7 @@ export function ListItem({title, subTitle, image, ImageComponent, onPress}) {
                 </View>
                 <MaterialCommunityIcons name='chevron-right' size={20} color='#000'/>
             </View>
-        </TouchableWithoutFeedback>
+        </TouchableOpacity>
   )
 }
 

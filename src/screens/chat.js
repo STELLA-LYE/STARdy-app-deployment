@@ -10,6 +10,7 @@ import { db, authentication} from '../../config';
 export default function Chat({route, navigation}) {
   console.log('route ' + route);
   const uid = route.params.uid
+  console.log('user id ' + uid);
   const userAvatar = route.params.userAvatar
   const [messages, setMessages] = useState([]);
   const currentUser = authentication?.currentUser?.uid;

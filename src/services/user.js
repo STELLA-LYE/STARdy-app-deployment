@@ -6,18 +6,6 @@ import { saveMediaToStorage } from "./random"
 
 
 
-// setDoc(doc(db, "users", authentication.currentUser.email), {
-//     name: name,
-//     gender: gender,
-//     major: major,
-//     year: year,
-//   }).then(() => {
-//     // data saved successfully
-//     console.log('data submitted');
-//   }).catch((error) => {
-//     //the write failed
-//     console.log(error)
-//   });
 
 // save photoURL to firestore and storage
 export const saveUserProfileImage = (image) => new Promise((resolve, reject) => {
@@ -29,17 +17,6 @@ export const saveUserProfileImage = (image) => new Promise((resolve, reject) => 
             .then(() => resolve(Date.now())) 
     })
 })
-
-// export const saveUserChatImage = (image, path) => new Promise((resolve, reject) => {
-//     saveMediaToStorage(image, `chat/${authentication.currentUser.uid}`)
-//         .then((downloadUrl) => {
-//             setDoc(doc(db, "evidence", authentication.currentUser.uid, "partner", path), {
-//                 imageURL: downloadUrl
-//             }, { merge: true })
-//             .then(() => resolve(Date.now()))
-        
-//     })
-// })
 
 export const saveUserEvidence = (image, otherUserID, task) => new Promise((resolve, reject) => {
     let currentTime = new Date().getHours() + ':' + new Date().getMinutes();

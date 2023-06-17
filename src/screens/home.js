@@ -57,11 +57,11 @@ export default function Home({navigation}) {
             // only display chats of users that are matched with the current user
               return (
                 <ListItem 
-                  onPress={() => navigation.navigate('Tasks', {name:item.name, uid:item.userID, userAvatar:item.photoURL, email: item.email})}
+                  onPress={() => navigation.navigate('Task', {name:item.name, uid:item.userID, userAvatar:item.photoURL, email: item.email})}
                   title={item.name}
                   image={item.photoURL}
                   />
-              )  
+              )
           }}
       />
 

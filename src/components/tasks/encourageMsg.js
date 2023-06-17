@@ -11,6 +11,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 const EncourageMessage = () => {
   const [currentDate, setCurrentDate] = useState('');
   const [msgcheck, setMsgcheck] = useState(false); 
@@ -31,7 +32,7 @@ const EncourageMessage = () => {
   }, []);
 
   const getSavedDate = async () => {
-    const date = await AsyncStorage.getItem('DATE');
+    const date = await AsyncStorage.getItem(authentication.currentUser.uid, 'DATE');
   }
 
 

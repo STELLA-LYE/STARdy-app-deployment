@@ -28,7 +28,7 @@ const Goals = () => {
   }, []);
 
   const getSavedDate = async () => {
-    const date = await AsyncStorage.getItem('DATE');
+    const date = await AsyncStorage.getItem(authentication.currentUser.uid, 'DATE');
   }
 
   // useEffect(() => {

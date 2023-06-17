@@ -15,8 +15,9 @@ export default function HomeChat({navigation}) {
   }
  
   const getUsers =  () => {
-    const docsRef = collection(db, 'users');
-    const q =  query(docsRef, where('userUID', '!=', authentication?.currentUser?.uid ));
+    // const docsRef = collection(db, 'users');
+    // const q =  query(docsRef, where('userUID', '!=', authentication?.currentUser?.uid ));
+    const q = query(collection(db, 'focusSession', authentication.currentUser.email, 'partners'));
     const docsSnap = onSnapshot(q, (onSnap) => {
       let data = [];
       onSnap.docs.forEach(user => {
@@ -45,13 +46,13 @@ export default function HomeChat({navigation}) {
       data={users}
       key={user => user.email}
       renderItem={({item}) => 
-      <ListItem 
-      onPress={() => navigation.navigate('Chat', {name:item.name, uid:item.userUID, userAvatar:item.avaterUrl})}
-      title={item.name}
-      subTitle={item.email}
-      image={item.avaterUrl}
-      />
-    }
+        <ListItem 
+        onPress={() => navigation.navigate('Chatroom', {name:item.name, uid:item.userID, userAvatar:item.photoURL})}
+        title={item.name}
+        // subTitle={item.email}
+        image={item.photoURL}
+        />
+      }
       />
 
   </>
@@ -59,6 +60,31 @@ export default function HomeChat({navigation}) {
     
   )
 }
+
+// const styles = StyleSheet.create({
+//   container:{
+//       flex:1, 
+//       backgroundColor: '#eef1e1',
+//   },
+//   button: {
+//     borderRadius: 100,
+//     paddingVertical: 10,
+//     paddingHorizontal: 10,
+//     backgroundColor: '#007788',
+//     flexDirection: 'column',
+//     justifyContent: 'center',
+//     width: 100,
+//     marginBottom: 10, 
+//   },
+//   buttonText: {
+//     color: '#f6f6f6',
+//     fontWeight: 'bold',
+//     fontFamily: 'RowdiesRegular', 
+//     fontSize: 14,
+//     textAlign: 'center',
+//   },
+// })
+
 
 const styles = StyleSheet.create({
   container:{
@@ -74,6 +100,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 100,
     marginBottom: 10, 
+    marginTop: 45,
+    marginLeft: 20
   },
   buttonText: {
     color: '#f6f6f6',
@@ -82,4 +110,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
+  empty: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignContent: 'center',
+    alignItems: 'center'
+  }, 
+  emptyText: {
+    fontSize: 24,
+    opacity: 0.5
+  }
 })

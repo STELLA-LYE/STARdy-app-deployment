@@ -69,7 +69,8 @@ export default function Profile({navigation}) {
       matched: false,
       email: authentication.currentUser.email,
       start: null,
-      xp: 200
+      xp: 200,
+      appState: appState, 
     }, {merge: true}).then(() => {
       // data saved successfully
       console.log('data submitted');

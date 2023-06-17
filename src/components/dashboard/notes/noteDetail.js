@@ -6,8 +6,10 @@ import { FontAwesome } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 import { useNotes } from '../../../context/noteProvider';
 import NoteInputModal from './noteInputModal';
+import { authentication } from '../../../../config';
 
 
 const formatDate = (ms) => {
@@ -33,13 +35,13 @@ const NoteDetail = (props) => {
     const [isEdit, setIsEdit] = useState(false);
 
     const deleteNote = async () => {
-        const result = await AsyncStorage.getItem('notes')
+        const result = await AsyncStorage.getItem(authentication.currentUser.uid + '/notes')
         let notes = []
         if (result != null) notes = JSON.parse(result)
 
         const newNotes = notes.filter(n => n.id != note.id)
         setNotes(newNotes);
-        await AsyncStorage.setItem('notes', JSON.stringify(newNotes))
+        await AsyncStorage.setItem(authentication.currentUser.uid + '/notes', JSON.stringify(newNotes))
         props.navigation.goBack();
     }
 
@@ -62,7 +64,7 @@ const NoteDetail = (props) => {
     }
 
     const handleUpdate = async (title, desc, time) => {
-        const result = await AsyncStorage.getItem('notes')
+        const result = await AsyncStorage.getItem(authentication.currentUser.uid + '/notes')
         let notes = [];
         if (result != null) notes = JSON.parse(result);
 
@@ -78,7 +80,7 @@ const NoteDetail = (props) => {
             return n;
         })
         setNotes(newNotes);
-        await AsyncStorage.setItem('notes', JSON.stringify(newNotes));
+        await AsyncStorage.setItem(authentication.currentUser.uid + '/notes', JSON.stringify(newNotes));
     }
 
     const handleOnClose = () => setShowModal(false)

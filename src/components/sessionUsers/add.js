@@ -159,136 +159,6 @@ export default function Add() {
   )
 }
 
-
-// const styles = StyleSheet.create({
-//     container: {
-//       flex: 1,
-//       backgroundColor: '#eef1e1',
-//       //marginBottom: 100, 
-//     },
-//     formContent: {
-//       flexDirection: 'row',
-//       marginTop: 30,
-//     },
-//     inputContainer: {
-//       borderBottomColor: '#F5FCFF',
-//       backgroundColor: '#FFFFFF',
-//       borderRadius: 30,
-//       borderBottomWidth: 1,
-//       height: 45,
-//       flexDirection: 'row',
-//       alignItems: 'center',
-//       flex: 1,
-//       margin: 10,
-//     },
-//     icon: {
-//       width: 30,
-//       height: 30,
-//     },
-//     iconBtnSearch: {
-//       alignSelf: 'center',
-//     },
-//     inputs: {
-//       height: 45,
-//       marginLeft: 16,
-//       borderBottomColor: '#FFFFFF',
-//       flex: 1,
-//     },
-//     inputIcon: {
-//       marginLeft: 15,
-//       justifyContent: 'center',
-//     },
-//     notificationList: {
-//       marginTop: 20,
-//       padding: 10,
-//     },
-//     card: {
-//       height: null,
-//       paddingTop: 10,
-//       paddingBottom: 10,
-//       marginTop: 5,
-//       backgroundColor: '#FFFFFF',
-//       flexDirection: 'column',
-//       borderTopWidth: 40,
-//       marginBottom: 20,
-//     },
-//     cardContent: {
-//       flexDirection: 'row',
-//       marginLeft: 10,
-//     },
-//     cardSection: {
-//       flexDirection: 'row',
-//       marginLeft: 60,
-//       marginTop: 5, 
-//     },
-//     imageContent: {
-//       marginTop: -40,
-//     },
-//     tagsContent: {
-//       marginTop: 10,
-//       flexWrap: 'wrap',
-//     },
-//     image: {
-//       width: 60,
-//       height: 60,
-//       borderRadius: 30,
-//     },
-//     name: {
-//       fontSize: 22,
-//       fontWeight: 'bold',
-//       marginLeft: 10,
-//       alignSelf: 'center',
-//       top: 10
-//     },
-//     about: {
-//       fontSize: 16,
-//       //fontWeight: 'bold',
-//       //marginLeft: 10,
-//       alignSelf: 'center',
-//       //padding: 12,
-//       borderRadius: 100
-//     },
-//     aboutContainer: {
-//       left: -50,
-//       top: 27,
-//       backgroundColor: '#ECECEC',
-//       margin: 3,
-//       padding: 10,
-//       justifyContent: 'center',
-//       alignItems: 'center',
-//       alignContent: 'center',
-//       borderRadius: 20
-//     },
-//     profile: {
-//       justifyContent: 'center',
-//       alignItems: 'center',
-//       backgroundColor: '#007788',
-//     },
-//     buttonText: {
-//       color: '#f6f6f6',
-//       fontWeight: 'bold',
-//       textAlign: 'center',
-//       //marginLeft: 11, 
-//       //marginTop: 8,
-      
-//     },
-//     button: {
-//       height: 35,
-//       flexDirection: 'row',
-//       justifyContent: 'centre',
-//       alignItems: 'centre',
-//       alignContent: 'center',
-//       borderRadius: 10,
-//       width: 100,
-//       //marginRight: 20,
-//       marginLeft: 170,
-//       bottom: 70
-//       //marginTop: 5,
-//       //backgroundColor: '#007788'
-//     }
-    
-//   })
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -297,7 +167,7 @@ const styles = StyleSheet.create({
   },
   formContent: {
     flexDirection: 'row',
-    marginTop: 10,
+    marginTop: 30,
   },
   inputContainer: {
     borderBottomColor: '#F5FCFF',
@@ -405,7 +275,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: 100,
     //marginRight: 20,
-    marginLeft: 170,
+    marginLeft: 250,
     bottom: 70
     //marginTop: 5,
     //backgroundColor: '#007788'
@@ -433,3 +303,5 @@ const styles = StyleSheet.create({
     
   },
 })
+
+                  

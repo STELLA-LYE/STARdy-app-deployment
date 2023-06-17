@@ -13,13 +13,16 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TextInput } from 'react-native-gesture-handler';
 
+
 const Evidence = ({route, navigation}) => {
 
     const { otherUserID, otherUser } = route.params;
+
     const currentUser = authentication.currentUser.uid
     const [taskName, setTaskName] = useState('');
     const [startDate, setStartDate] = useState(0);
     const { otherUserEmail } = route.params;
+    console.log(otherUserEmail);
     const [evidenceUploaded, setEvidenceUploaded] = useState(true);
 
   const [currentDate, setCurrentDate] = useState('');
@@ -30,14 +33,14 @@ const Evidence = ({route, navigation}) => {
 
   // everytime user opens the evidence page, it will store the user start date
   useEffect(() => {
-    const docRef = doc(db, "users", authentication.currentUser.email);
+    const docRef = doc(db, "focusSession", authentication.currentUser.email, "partners", otherUserEmail);
       
     getDoc(docRef)
       .then((doc) => {
           const s = doc.get('start')
-          console.log(doc.get('start'))
+          console.log('startreal: ' + doc.get('start'))
           setStartDate(s)
-          console.log('start: ' + startDate)
+          console.log('start1: ' + startDate)
         
         }) 
   }, []);
@@ -45,6 +48,10 @@ const Evidence = ({route, navigation}) => {
 
 
   const uploadEvidence = async () => {
+
+        //console.log(result.assets[0].uri);
+
+       
     
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -52,43 +59,50 @@ const Evidence = ({route, navigation}) => {
           aspect: [4, 3],
           quality: 1
         })
-    
-        //console.log(result.assets[0].uri);
 
-        //get current date when user is uploading
-        const currentDate = new Date().getDate();
-        const expectedSubmissionDate = startDate + 1;
-    
         if (!result.canceled) {
           setEvidenceUploaded(false);
-          if (currentDate <= expectedSubmissionDate) {
-            console.log("starttt " + startDate)
-            console.log("on time")
-            //setOnTime(true);
-            await saveUserEvidence(result.assets[0].uri, otherUserID, taskName)
-            .then(() => setEvidenceUploaded(true))
-          } else {
-            //setOnTime(false)
-            Alert.alert("You've missed the deadline!", 
-              [{
-                text: 'OK',
-                onPress: () => {
-                  console.log('missed')
-                  navigation.navigate('Main Tab')
-                } 
-              }])
-          }
+          saveUserEvidence(result.assets[0].uri, otherUserID, taskName)
+          .then((date) => setEvidenceUploaded(true))
         }
+        
+        // if (!result.canceled) {
+        //   setEvidenceUploaded(false);
+        //   if (currentDate <= expectedSubmissionDate) {
+        //     // console.log("starttt " + startDate)
+        //     // console.log("on time")
+        //     //setOnTime(true);
+        //     saveUserEvidence(result.assets[0].uri, otherUserID, taskName)
+        //     .then(() => setEvidenceUploaded(true))
+        //   } else {
+        //     //setOnTime(false)
+        //     Alert.alert("You've missed the deadline!", 
+        //       [{
+        //         text: 'OK',
+        //         onPress: () => {
+        //           console.log('missed')
+        //           navigation.navigate('Main Tab')
+        //         } 
+        //       }])
+        //   }
+        // }
   }
 
   const finalize = async () => {
+
+     //get current date when user is uploading
+      const currentDate = new Date().getDate();
+      const expectedSubmissionDate = startDate + 1;
+      console.log('Expected: ' + expectedSubmissionDate)
+      console.log(currentDate);
 
       const usersRef = doc(db, "users", authentication.currentUser.email);
       await setDoc(usersRef, {
         matched: false,
       }, { merge: true})
 
-      Alert.alert("Another successful day!", 
+      if (currentDate <= expectedSubmissionDate) {
+        Alert.alert("Another successful day!", 
         "Wait patiently for your XP as your partner verifies your evidence, in the meantime, feel free to start another focus session!",
         [{
             text: 'OK',
@@ -97,6 +111,22 @@ const Evidence = ({route, navigation}) => {
                 navigation.navigate('Main Tab')
             }
         }] )
+      } else if (currentDate > expectedSubmissionDate) {
+        console.log(currentDate);
+        navigation.navigate('Main Tab')
+        Alert.alert("Sorry, you've missed the deadline for submission", "Don't give up! You can start fresh today by doing another focus session :)")
+        
+        // Alert.alert("Sorry, you've missed the deadline for submission", 
+        // [{
+        //     text: 'OK',
+        //     onPress: () => {
+        //         console.log('ok pres')
+        //         navigation.navigate('Main Tab')
+        //     }
+        // }])
+      }
+      
+
     
     
   }
@@ -188,7 +218,7 @@ const Evidence = ({route, navigation}) => {
             borderRadius: 10,
           }}
           onPress={finalize}>
-          <Text style={{color: '#fff', fontSize: 18, fontWeight: 'bold' }}>Submit</Text>
+          <Text style={{color: '#fff', fontSize: 18, fontWeight: 'bold' }}>Finalize</Text>
         </TouchableOpacity>
 
       </View>

@@ -18,16 +18,17 @@ export default function Tasks({route, navigation}) {
     {
       id: 1,
       name: 'Task 1',
-      task: 'Send the evidences!',
-      details: 'Send evidences of completion of your goals to your accountability partner via the chat feature. Note: send the evidences in the form of google drive links', 
-      Due: 'Deadline: 23:59 today'
+      task: 'Set your goals for the day!',
+      details: 'Note down your goals and send it to your accountability partner', 
+      Due: 'Deadline: 23:59 today', 
+
     },
     {
       id: 2,
       name: 'Task 2',
-      task: 'Verification!',
-      details: 'verify the evidence sent by your accountability partner', 
-      Due: 'Deadline: 23:59 the next day'
+      task: 'Send the evidences!',
+      details: 'Send evidences of completion of your goals to your accountability partner via the chat feature. Note: send the evidences in the form of google drive links', 
+      Due: 'Deadline: 23:59 today'
     },
     {
       id: 3, 
@@ -39,23 +40,25 @@ export default function Tasks({route, navigation}) {
     {
       id: 4,
       name: 'Task 4',
-      task: 'Set your goals for the day!',
-      details: 'Note down your goals and send it to your accountability partner', 
-      Due: 'Deadline: 23:59 today', 
-
+      task: 'Verification!',
+      details: 'verify the evidence sent by your accountability partner', 
+      Due: 'Deadline: 23:59 the next day'
     },
+    
+    
     
   ]
   
 
   function doTasks(item) {
     if (item.id == 1) {
-      return ()=> navigation.navigate('Evidence', {otherUserID: uid, otherUser: email, currentUser: authentication.currentUser.uid }); 
+      return ()=> navigation.navigate('Evidence', {otherUserID: uid, otherUserEmail: email, currentUser: authentication.currentUser.uid }); 
     } else if (item.id == 2) {
       return ()=> navigation.navigate('Verify',{otherUserEmail: email, otherUserID: uid,}); 
+    } else if (item.id == 3) {
+      return ()=> navigation.navigate('Encouragement Msg'); 
     } else {
-      return ()=> navigation.navigate('EncourageMessage'); 
-      
+      return ()=> navigation.navigate('Goals'); 
     }
   }
 
