@@ -1,5 +1,5 @@
 import { ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "firebase/storage"
-import { storage } from "../../config"
+import { authentication, storage } from "../../config"
 
 import { db } from "../../config";
 

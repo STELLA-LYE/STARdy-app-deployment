@@ -1,254 +1,288 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+//Code for stopwatch and timer with already set time for users 
+
+// import React in our code
+import React, {useState} from 'react';
+
+// import all the components we are going to use
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  TouchableHighlight,
+} from 'react-native';
+
+import { Entypo } from '@expo/vector-icons'; 
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+
+// importing library to use Stopwatch and Timer
+import {Stopwatch, Timer} from 'react-native-stopwatch-timer';
 
 const FocusTimer = () => {
+
+  //Stopwatch 
+  const [isStopwatchStart, setIsStopwatchStart] = useState(false);
+  const [isTimerStart, setIsTimerStart] = useState(false);
+
+  //45 minutes Timer 
+  const [timerDuration45, setTimerDuration45] = useState(2700000);
+  const [isTimerStart45, setIsTimerStart45] = useState(false);
+  const [resetTimer45, setResetTimer45] = useState(false);
+
+  //1 hour timer 
+  const [timerDuration1, setTimerDuration1] = useState(3600000);
+  const [isTimerStart1, setIsTimerStart1] = useState(false);
+  const [resetTimer1, setResetTimer1] = useState(false);
+
+  //1 hour 30 minutes timer 
+  const [timerDuration13, setTimerDuration13] = useState(5400000);
+  const [resetTimer, setResetTimer] = useState(false);
+  const [resetStopwatch, setResetStopwatch] = useState(false);
+
+
+
+
   return (
-    <View>
-      <Text>FocusTimer</Text>
-    </View>
-  )
-}
+    <SafeAreaView style={styles.container}>
 
-export default FocusTimer
+      <View style={styles.container}>
 
-// Code for Timer which users can set their own time 
+      {/* <Header2/> */}
 
-// import React, {Component} from "react";
-// import {
-//   StyleSheet,
-//   View,
-//   Text,
-//   Dimensions,
-//   StatusBar,
-//   TouchableOpacity,
-//   Platform, 
-//   Alert, 
-// } from "react-native";
+        {/* <Text style={styles.title}>
+          Focus countdown timers and stopwatch
+        </Text> */}
+        {/* Stopwatch */}
+        <View style={styles.section}>
+        <Text style={styles.typeStop}>Stopwatch</Text>
+        <Entypo name="stopwatch" size={24} color="#89AAFF" />
+        </View>
 
-// import {Picker} from "@react-native-picker/picker";
+        <View style={styles.sectionStyle}>
+          <Stopwatch
+            laps
+            msecs
+            start={isStopwatchStart}
+            // To start
+            reset={resetStopwatch}
+            // To reset
+            options={options}
+            // Options for the styling
+            getTime={(time) => {
+              console.log(time);
+            }}
+          />
+          <TouchableHighlight
+            onPress={() => {
+              setIsStopwatchStart(!isStopwatchStart);
+              setResetStopwatch(false);
+            }}>
+            <Text style={styles.buttonStop}>
+              {!isStopwatchStart ? 'START' : 'STOP'}
+            </Text>
+          </TouchableHighlight>
+          <TouchableHighlight
+            onPress={() => {
+              setIsStopwatchStart(false);
+              setResetStopwatch(true);
+            }}>
+            <Text style={styles.buttonStop}>RESET</Text>
+          </TouchableHighlight>
+        </View>
 
-// const screen = Dimensions.get("window");
+        <View style={styles.section}>
+        <Text style={styles.typeTimer}>Timer</Text>
+        <MaterialCommunityIcons name="timer-sand" size={24} color="#FAB972" />
+        </View>
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#007788",
-//     alignItems: "center",
-//     justifyContent: "center"
-//   },
-//   button: {
-//     borderWidth: 10,
-//     borderColor: "#89AAFF",
-//     width: screen.width / 2,
-//     height: screen.width / 2,
-//     borderRadius: screen.width / 2,
-//     alignItems: "center",
-//     justifyContent: "center",
-//     marginTop: 30
-//   },
-//   buttonStop: {
-//     //borderColor: "#FF851B"
-//     borderColor: "#FAB972"
-//   },
-//   buttonText: {
-//     fontSize: 45,
-//     color: "#89AAFF"
-//   },
-//   buttonTextStop: {
-//     //color: "#FF851B"
-//     color: '#FAB972'
-//   },
-//   timerText: {
-//     color: "#fff",
-//     fontSize: 90
-//   },
-//   picker: {
-//     flex: 1,
-//     // maxWidth: 50,
-//     ...Platform.select({
-//       android: {
-//         color: "#fff",
-//         backgroundColor: "rgba(92, 92, 92, 0.206)",
-//       }
-//     })
-//   },
-//   pickerItem: {
-//     color: "#fff",
-//     fontSize: 20,
-//     ...Platform.select({
-//       android: {
-//         marginLeft: 10,
-//         marginRight: 10,
-//       }
-//     })
-//   },
-//   pickerContainer: {
-//     flexDirection: "row",
-//     alignItems: "center"
-//   }
-// });
+        {/* Timer for 45 minutes   */}
+        <View style={styles.sectionStyle}>
 
-// const formatNumber = number => `0${number}` . slice(-2);
+          <Timer
+            totalDuration={timerDuration45}
+            msecs
+            // Time Duration
+            start={isTimerStart45}
+            // To start
+            reset={resetTimer45}
+            // To reset
+            options={options}
+            // Options for the styling
+            handleFinish={() => {
+              alert('Custom Completion Function');
+            }}
+            // Can call a function On finish of the time
+            getTime={(time) => {
+              console.log(time);
+            }}
+          />
+          <TouchableHighlight
+            onPress={() => {
+              setIsTimerStart45(!isTimerStart45);
+              setResetTimer45(false);
+            }}>
+            <Text style={styles.buttonText}>
+              {!isTimerStart45 ? 'START' : 'STOP'}
+            </Text>
+          </TouchableHighlight>
+          <TouchableHighlight
+            onPress={() => {
+              setIsTimerStart45(false);
+              setResetTimer45(true);
+            }}>
+            <Text style={styles.buttonText}>RESET</Text>
+          </TouchableHighlight>
+        </View>
 
-// const getRemaining = time => {
-//   const hours = Math.floor(time / 3600); 
-//   const minutes = Math.floor((time - hours * 3600) / 60);
-//   const seconds = time - minutes * 60 - hours * 3600;
-//   return {hours: formatNumber(hours), minutes: formatNumber(minutes), seconds: formatNumber(seconds)}
-// }
-
-// const createArray = length => {
-//   const arr = [];
-//   let i = 0;
-//   while(i < length){
-//     arr.push(i.toString());
-//     i += 1;
-//   }
-//   return arr;
-// }
-
-// const AVAILABLE_HOURS = createArray(10);
-// const AVAILABLE_MINUTES = createArray(60);
-// const AVAILABLE_SECONDS = createArray(60);
-
-
-
-// export default class FocusTimer extends Component{
-//   state = {
-//     remainingSeconds: 5,
-//     isRunning: false,
-//     selectedMinutes: "0",
-//     selectedSeconds: "5", 
-//     selectedHours: "0", 
-//   }
-
-//   interval = null;
-
-//   componentDidUpdate = (prevProp, prevState) => {
-//     if(this.state.remainingSeconds === 0 && prevState.remainingSeconds !== 0){
-//       this.stop();
-//       Alert.alert('Timer end', 'Time is up!', [
-//         {text: 'Understood', onPress: () => console.log('alert closed')}
-//       ]); 
-//     }
-//   }
-
-//   componentWillUnmount() {
-//     if(this.interval){
-//       clearInterval(this.interval);
-//     }
-//   }
-
-//   start = () => {
-//     this.setState(state => ({
-//       remainingSeconds: 
-//         parseInt(state.selectedHours, 10) * 60 * 60 +
-//         parseInt(state.selectedMinutes, 10) * 60 +
-//         parseInt(state.selectedSeconds, 30),
-//         isRunning: true
-//     }));
-//     this.interval = setInterval(() => {
-//       this.setState(state => ({
-//         remainingSeconds: state.remainingSeconds - 1
-//       }));
-//     }, 1000);
-//   }
-
-//   stop = () => {
-//     clearInterval(this.interval);
-//     this.interval = null;
-//     this.setState({
-//       remainingSeconds: 5,
-//       isRunning: false
-//     })
-//   }
-
-//   renderPickers = () => (
-//     <View style={styles.pickerContainer}>
-
-//       <Picker
-//         style={styles.picker}
-//         itemStyle={styles.pickerItem}
-//         selectedValue={this.state.selectedHours}
-//         onValueChange={itemValue => {
-//           this.setState({selectedHours: itemValue});
-//         }}
-//         mode="dropDown"
-//       > 
-//         {
-//           AVAILABLE_HOURS.map(value => (
-//             <Picker.Item key={value} label={value} value={value} />
-//           ))
-//         }
-//       </Picker>
-//       <Text style={styles.pickerItem}>hours</Text>
+        {/* Timer for 1 hour   */}
+        <View style={styles.sectionStyle}>
+          <Timer
+            totalDuration={timerDuration1}
+            msecs
+            // Time Duration
+            start={isTimerStart1}
+            // To start
+            reset={resetTimer1}
+            // To reset
+            options={options}
+            // Options for the styling
+            handleFinish={() => {
+              alert('Custom Completion Function');
+            }}
+            // Can call a function On finish of the time
+            getTime={(time) => {
+              console.log(time);
+            }}
+          />
+          <TouchableHighlight
+            onPress={() => {
+              setIsTimerStart1(!isTimerStart1);
+              setResetTimer1(false);
+            }}>
+            <Text style={styles.buttonText}>
+              {!isTimerStart1 ? 'START' : 'STOP'}
+            </Text>
+          </TouchableHighlight>
+          <TouchableHighlight
+            onPress={() => {
+              setIsTimerStart1(false);
+              setResetTimer1(true);
+            }}>
+            <Text style={styles.buttonText}>RESET</Text>
+          </TouchableHighlight>
+        </View>
 
 
-//       <Picker
-//         style={styles.picker}
-//         itemStyle={styles.pickerItem}
-//         selectedValue={this.state.selectedMinutes}
-//         onValueChange={itemValue => {
-//           this.setState({selectedMinutes: itemValue});
-//         }}
-//         mode="dropDown"
-//       > 
-//         {
-//           AVAILABLE_MINUTES.map(value => (
-//             <Picker.Item key={value} label={value} value={value} />
-//           ))
-//         }
-//       </Picker>
-//       <Text style={styles.pickerItem}>minutes</Text>
-//       <Picker
-//         style={styles.picker}
-//         itemStyle={styles.pickerItem}
-//         selectedValue={this.state.selectedSeconds}
-//         onValueChange={itemValue => {
-//           this.setState({selectedSeconds: itemValue});
-//         }}
-//         mode="dropDown"
-//       > 
-//         {
-//           AVAILABLE_SECONDS.map(value => (
-//             <Picker.Item key={value} label={value} value={value} />
-//           ))
-//         }
-//       </Picker>
-//       <Text style={styles.pickerItem}>seconds</Text>
-//     </View>
-//   );
+        {/* Timer for 1 hour 30 minutes   */}
+        <View style={styles.sectionStyle}>
+          <Timer
+            totalDuration={timerDuration13}
+            msecs
+            // Time Duration
+            start={isTimerStart}
+            // To start
+            reset={resetTimer}
+            // To reset
+            options={options}
+            // Options for the styling
+            handleFinish={() => {
+              alert('Custom Completion Function');
+            }}
+            // Can call a function On finish of the time
+            getTime={(time) => {
+              console.log(time);
+            }}
+          />
+          <TouchableHighlight
+            onPress={() => {
+              setIsTimerStart(!isTimerStart);
+              setResetTimer(false);
+            }}>
+            <Text style={styles.buttonText}>
+              {!isTimerStart ? 'START' : 'STOP'}
+            </Text>
 
-//   render(){
-//     const {hours, minutes, seconds} = getRemaining(this.state.remainingSeconds);
-//     return(
-//       <View style={styles.container}>
-//         <StatusBar barStyle="light-content" />
-//         {
-//           this.state.isRunning ? (
-//             <Text style={styles.timerText}>{`${hours}:${minutes}:${seconds}`}</Text>
-//           ) : (
-//             this.renderPickers()
-//           )
-//         }
-//         {
-//           this.state.isRunning ? (
-//             <TouchableOpacity 
-//               onPress={this.stop}
-//               style={[styles.button, styles.buttonStop]}
-//               >
-//                 <Text style={[styles.buttonText, styles.buttonTextStop]}>Stop</Text>
-//               </TouchableOpacity>
-//           ) : (
-//             <TouchableOpacity 
-//               onPress={this.start}
-//               style={styles.button}
-//               >
-//                 <Text style={styles.buttonText}>Start</Text>
-//               </TouchableOpacity>
-//           )
-//         }
-//       </View>
-//     );
-//   }
-// }
+          </TouchableHighlight>
+          <TouchableHighlight 
+            onPress={() => {
+              setIsTimerStart(false);
+              setResetTimer(true);
+            }}>
+            <Text style={styles.buttonText}>RESET</Text>
+          </TouchableHighlight>
+        </View>
+
+
+      </View>
+    </SafeAreaView>
+  );
+};
+
+export default FocusTimer;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#007788'
+  },
+  title: {
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: 'bold',
+    padding: 20,
+  },
+  sectionStyle: {
+    flex: 1,
+    alignItems: 'center',
+    // justifyContent: 'center',
+  },
+    section: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    flexDirection: 'row',
+    marginLeft: 30, 
+    marginBottom: -50, 
+    marginTop: -50, 
+  },
+  buttonText: {
+    fontSize: 20,
+    marginTop: 10,
+    //fontWeight: 'bold'
+    color: '#FAB972'
+  },
+  buttonStop: {
+    fontSize: 20,
+    marginTop: 10,
+    //fontWeight: 'bold'
+    color: '#89AAFF'
+  },
+  typeStop: {
+    fontSize: 20,
+    fontWeight: 'bold', 
+    color: '#89AAFF', 
+    marginRight: 10, 
+  },
+  typeTimer: {
+    fontSize: 20,
+    fontWeight: 'bold', 
+    color: '#FAB972', 
+    marginRight: 10, 
+  },
+});
+
+const options = {
+  container: {
+    backgroundColor: '#007788',
+    padding: 5,
+    borderRadius: 5,
+    width: 200,
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 25,
+    color: '#FFF',
+    marginLeft: 7,
+    fontWeight: 'bold'
+  },
+};

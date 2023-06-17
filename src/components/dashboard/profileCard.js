@@ -51,7 +51,7 @@ const ProfileCard = ({ nav }) => {
                     setGender(doc.get('gender'))
                     setPhotoURL(doc.get('photoURL'))  
                     //console.log(photoURL)
-                    console.log(Date.now())
+                    //console.log(Date.now())
                 })    
          }, [])
     )
@@ -65,10 +65,10 @@ const ProfileCard = ({ nav }) => {
         <View style={{
             height: 190,
             marginHorizontal: 15,
-            paddingHorizontal: 6,
-            paddingVertical: 18,
+            //paddingHorizontal: 6,
+            //paddingVertical: 18,
             backgroundColor: '#eef1e1',
-            borderWidth: 1,
+            //borderWidth: 1,
             borderColor: '#007788',
             //borderRadius: 10,
             //backgroundColor: '#',
@@ -97,7 +97,8 @@ const ProfileCard = ({ nav }) => {
                             width: 75,
                             height: 75,
                             borderRadius: 75 /2,
-                            position: 'absolute'
+                            position: 'absolute',
+                            
                         }} />
                     </TouchableOpacity>
                 </View>
@@ -196,7 +197,7 @@ const ProfileCard = ({ nav }) => {
                 flex: 1,
                 marginTop: -6
             }}>
-                <ProgressBar />
+                <ProgressBar navigation={nav}/>
 
             </View>
 
@@ -208,6 +209,7 @@ const styles=StyleSheet.create({
     caption: {
         fontSize: 16,
         //color: '#007788'
+        fontWeight: '500'
     }
 })
 

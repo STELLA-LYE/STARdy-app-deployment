@@ -6,8 +6,7 @@ import Analytics from '../screens/analytics';
 import Dashboard from '../screens/dashboard';
 import FocusTimer from '../screens/focusTimer';
 import SessionUsers from '../screens/sessionUsers';
-import Stardyroom from '../screens/stardyroom';
-import Chat from '../screens/chat';
+import HomeChat from '../screens/homeChat';
 
 import { FontAwesome } from '@expo/vector-icons';
 import { SimpleLineIcons } from '@expo/vector-icons';
@@ -37,7 +36,7 @@ export default function MainTab() {
 
       <MainTab.Screen 
         name='Analytics' 
-        component={Analytics} 
+        component={HomeChat} 
         options={{
           tabBarIcon: ({focused}) => (
             <View style={{

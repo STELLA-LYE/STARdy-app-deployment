@@ -2,9 +2,9 @@ import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity} from 'react-
 import React, { useEffect, useState } from 'react'
 import { collection, onSnapshot, where, query } from 'firebase/firestore'
 import { authentication, db } from '../../config'
-import { ListItem } from '../components/tasks/listItem'
+import { ListItem } from '../components/chat/listItem'
 
-export default function Home({navigation}) {
+export default function HomeChat({navigation}) {
   const [users, setUsers] = useState([]);
 
   const logoutUser = async () => {
@@ -15,20 +15,20 @@ export default function Home({navigation}) {
   }
  
   const getUsers =  () => {
-    const docsRef = collection(db, 'focusSession', authentication.currentUser.email, 'partners');
-    const q =  query(docsRef, where('active', '==', true));
+    const docsRef = collection(db, 'users');
+    const q =  query(docsRef, where('userUID', '!=', authentication?.currentUser?.uid ));
     const docsSnap = onSnapshot(q, (onSnap) => {
       let data = [];
-      onSnap.docs.forEach(async user => {
+      onSnap.docs.forEach(user => {
         data.push({...user.data()})
-        setUsers(data)      
+        setUsers(data)
+        console.log(user.data())
+        
       })
     })
   }
-
   useEffect(() => {
     getUsers();
-    console.log(users);
   },[])
 
 
@@ -41,31 +41,18 @@ export default function Home({navigation}) {
           </View>
       </TouchableOpacity>
 
-      {/* <View style={styles.empty}>
-        <Text style={styles.emptyText}>Send your evidence here!</Text>
-      </View> */}
-
       <FlatList
       data={users}
       key={user => user.email}
       renderItem={({item}) => 
-          {
-            // console.log(item.matched)
-            //console.log(item.userID)
-            
-            // console.log(authentication.currentUser.uid)
-            // only display chats of users that are matched with the current user
-              return (
-                <ListItem 
-                  onPress={() => navigation.navigate('Tasks', {name:item.name, uid:item.userID, userAvatar:item.photoURL, email: item.email})}
-                  title={item.name}
-                  image={item.photoURL}
-                  />
-              )  
-          }}
+      <ListItem 
+      onPress={() => navigation.navigate('Chat', {name:item.name, uid:item.userUID, userAvatar:item.avaterUrl})}
+      title={item.name}
+      subTitle={item.email}
+      image={item.avaterUrl}
       />
-
-      
+    }
+      />
 
   </>
   </View>
@@ -87,8 +74,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 100,
     marginBottom: 10, 
-    marginTop: 45,
-    marginLeft: 20
   },
   buttonText: {
     color: '#f6f6f6',
@@ -97,14 +82,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
-  empty: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignContent: 'center',
-    alignItems: 'center'
-  }, 
-  emptyText: {
-    fontSize: 24,
-    opacity: 0.5
-  }
 })

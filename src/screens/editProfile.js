@@ -18,30 +18,36 @@ import { saveUserProfileImage } from '../services/user';
 
 export default function EditProfile({navigation}) {
 
-  const [name, setName] = useState(''); 
-  const [gender, setGender] = useState(''); 
-  const [major, setMajor] = useState(''); 
-  const [year, setYear] = useState(''); 
-  const [photoURL, setPhotoURL] = useState('');
+  const [name, setName] = useState(null); 
+  const [gender, setGender] = useState(null); 
+  const [major, setMajor] = useState(null); 
+  const [year, setYear] = useState(null); 
+  const [photoURL, setPhotoURL] = useState(null);
 
   const [lastPhotoUpdatedAt, setLastPhotoUpdatedAt] = useState(null);
 
   //submit changes
   const handleSubmit = () => {
-    setDoc(doc(db, "users", authentication.currentUser.email), {
-      name: name,
-      gender: gender,
-      major: major,
-      year: year,
-      userID: authentication.currentUser.uid
-    }, { merge: true }).then(() => {
-      // data saved successfully
-      console.log('data submitted');
-    }).catch((error) => {
-      //the write failed
-      console.log(error)
-    });
-    navigation.navigate('Main Tab');
+    if (name == null || gender == null || major == null || year == null || photoURL == null) {
+      Alert.alert('Fields cannot be empty!')
+    } else {
+      setDoc(doc(db, "users", authentication.currentUser.email), {
+        name: name,
+        gender: gender,
+        major: major,
+        year: year,
+        userID: authentication.currentUser.uid,
+        photoURL: photoURL
+      }, { merge: true }).then(() => {
+        // data saved successfully
+        console.log('data submitted');
+      }).catch((error) => {
+        //the write failed
+        console.log(error)
+      });
+      navigation.navigate('Main Tab');
+    }
+  
   }
 
   // upload profile image
@@ -57,9 +63,8 @@ export default function EditProfile({navigation}) {
     console.log(result.assets[0].uri);
 
     if (!result.canceled) {
-      setLastPhotoUpdatedAt(Date.now());
-      // save photo to storage and generate downloadURL to be saved in firestore
-      saveUserProfileImage(result.assets[0].uri) 
+      saveUserProfileImage(result.assets[0].uri)
+      .then((date) => setLastPhotoUpdatedAt(date))
     }
   }
 

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useFonts } from 'expo-font';
 
 import Welcome from './src/screens/welcome';
@@ -9,7 +9,11 @@ import Notes from './src/screens/notes';
 import Encouragement from './src/screens/encouragement';
 import EditProfile from './src/screens/editProfile';
 import Login from './src/screens/login';
-import Chat from './src/screens/chat';
+import SignUp from './src/screens/signup';
+import Tasks from './src/screens/tasks';
+import Verify from './src/components/tasks/verify';
+import Evidence from './src/components/tasks/evidence';
+import Leaderboard from './src/screens/leaderboard';
 
 import { Feather } from '@expo/vector-icons';
 
@@ -47,21 +51,51 @@ export default function App() {
             <Feather
               name='arrow-left' 
               size={22} 
-              onPress={() => navigation.goBack() }
+              onPress={() => navigation.goBack()}
               color='#f6f6f6' />
           )
         })}>
           <Stack.Screen name='Welcome' component={Welcome} options={{ headerShown: false }}/>
           <Stack.Screen name='Login' component={Login} options={{ headerShown: false }}/>
+          <Stack.Screen name='Sign Up' component={SignUp} options={{ headerShown: false }}/>
           <Stack.Screen name='Profile' component={Profile} options={{ headerShown: false }}/>
           <Stack.Screen name='Main Tab' component={MainTab} options={{ headerShown: false }}/>
           <Stack.Screen name='Notes' component={Notes} />
           <Stack.Screen name='To Do List' component={Todo} />
           <Stack.Screen name='Encouragement Notes!' component={Encouragement} /> 
-          <Stack.Screen name='Edit Profile' component={EditProfile} /> 
+          <Stack.Screen name='Leaderboard' component={Leaderboard} /> 
+          <Stack.Screen name='Edit Profile' component={EditProfile} 
+            options={({ navigation }) => ({
+              headerTitleStyle: {
+                color: '#f6f6f6'
+              },
+              headerStyle: {
+                backgroundColor: '#007788'
+              },
+              headerTitleAlign: 'center',
+              headerLeft: () => (
+                <Feather
+                  name='arrow-left' 
+                  size={22} 
+                  onPress={() => {
+                    Alert.alert(
+                      "Discard changes", 
+                      "Are you sure you want to discard all changes",
+                      [ 
+                        {text: 'Yes', onPress: () => navigation.goBack()},
+                        {text: 'No', onPress: () => console.log('canceled'), style: 'cancel' },
+                        
+                      ],
+                      {cancelable: false} )
+                  } }
+                  color='#f6f6f6' />
+              )
+            })} /> 
+          <Stack.Screen name='Evidence' component={Evidence} /> 
+          <Stack.Screen name='Verify' component={Verify} /> 
           <Stack.Screen
-               name='Chat'
-               component={Chat}
+               name='Tasks'
+               component={Tasks}
                options={({route}) => ({
                 headerBackVisible:false,
                 title:route.params.name,
@@ -71,6 +105,7 @@ export default function App() {
 
                })}
                />
+          
         </Stack.Navigator>
       </NavigationContainer>
     )

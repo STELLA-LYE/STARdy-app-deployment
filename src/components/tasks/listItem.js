@@ -1,6 +1,6 @@
 import { Image, StyleSheet, View, TouchableWithoutFeedback } from 'react-native'
 import React from 'react'
-import { AppText } from '../tasks/appText'
+import { AppText } from './appText';
 import {MaterialCommunityIcons} from "@expo/vector-icons"
 
 export function ListItem({title, subTitle, image, ImageComponent, onPress}) {

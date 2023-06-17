@@ -1,15 +1,58 @@
 import React, { useState } from 'react';
+import { useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { authentication, db } from '../../../config';
+import { doc, getDoc, get, where, Filter, getDocs, query, collection, setDoc} from "firebase/firestore";
+import { useFocusEffect } from '@react-navigation/native';
 
 
-const goToLeaderboard = () => {
-    Alert.alert('Leaderboard WIP')
-}
 
-const ProgressBar = () => {
 
-    const [width, setWidth] = useState('90%');
+
+const ProgressBar = ({ navigation }) => {
+
+    const goToLeaderboard = () => {
+        Alert.alert('Leaderboard WIP')
+        navigation.navigate('Leaderboard')
+    }
+
+    const [userXP, setUserXP] = useState(0);
+    const [width, setWidth] = useState(0);
+
+    const userRef = doc(db, "users", authentication.currentUser.email);
+    useFocusEffect(
+        useCallback(() => {
+            getDoc(userRef)
+                .then((doc) => {
+                    console.log(doc.get('xp'))
+                    setUserXP(doc.get('xp')) 
+                }) 
+                
+            
+         }, [])
+    )
+
+    useEffect(() => {
+        const percent = userXP / 1000 * 100;
+            console.log('percent ' + percent)
+            setWidth(percent + '%');
+
+    }, [userXP])
+
+    // useEffect(() => {
+    //     
+    //     getDoc(userRef)
+    //         .then((doc) => {
+    //             console.log(doc.get('xp'))
+    //             setUserXP(doc.get('xp'))
+    //         })
+
+    //     const percent = userXP / 1000 * 100;
+    //     console.log('percent ' + percent)
+    //     setWidth(percent + '%');
+    // }, [])
+
 
     return (
         <SafeAreaView style={{
@@ -58,7 +101,7 @@ const ProgressBar = () => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 top: -40,
-                //left:0
+                right: 50
 
             }}>
                 <TouchableOpacity onPress={goToLeaderboard}>
@@ -66,7 +109,7 @@ const ProgressBar = () => {
                         style={{
                             width: 50,
                             height: 50,
-                            top: 40
+                            top: 50
                            
 
                         }} />
@@ -95,7 +138,7 @@ const styles=StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.1)',
         borderRadius: 20,
         //position: 'absolute',
-        top: -15,
+        top: 0,
         width: 250
         
     },

@@ -32,7 +32,7 @@ export default function Random(props) {
   const[photoURL, setPhotoURL] = useState(null);
   const [userID, setUserID] = useState(authentication.currentUser.uid);
   const [isRequesting, setIsRequesting] = useState(null);
-  const [matched, setMatched] = useState(false);
+  const [matched, setMatched] = useState(null);
 
   const docRef = doc(db, "users", authentication.currentUser.email);
 
@@ -40,7 +40,7 @@ export default function Random(props) {
 
   // filter 
   useEffect(() => {
-    const q = query(collection(db, "users"), where("major", ">=", major), where("year", "==", year));
+    const q = query(collection(db, "users"), where("major", "==", major), where("year", "==", year));
     getDocs(q)
         .then((snapshot) => {
           let users = snapshot.docs.map(doc => {
@@ -65,7 +65,6 @@ export default function Random(props) {
           setPhotoURL(doc.get('photoURL'))
       })
      }, [])
-
   )
 
   const cardClickEventListener = item => {
@@ -87,13 +86,15 @@ export default function Random(props) {
     setIsRequesting(item.id);
     const docRef = doc(db, "requests", item.id, "userRequests", authentication.currentUser.email);
     setDoc(docRef, {
-      accepted: false,
       name: name,
       gender: gender,
       year: year,
       major: major,
-      photoURL: photoURL      
+      photoURL: photoURL,
+      userID: authentication.currentUser.uid,
+      email: authentication.currentUser.email
     })
+    Alert.alert("Request sent!", `Please wait for ${item.name} to accept your request.`)
   }
 
   noRequest = (item) => Alert.alert('Already Requested!', `Wait for ${item.name} to accept your request.`)
@@ -104,16 +105,6 @@ export default function Random(props) {
 
     <View style={styles.container}>
 
-      {/* <TextInput 
-          placeholder='Type Here...'
-  onChange={(search)=> fetchUsers(search)}/> */}
-
-      {/* <TouchableOpacity
-          style={[styles.startbutton]}
-          onPress={fetchUsers()}>
-          <Text style={styles.buttonText}> Start Search </Text>
-      </TouchableOpacity> */}
-
       <FlatList
         numColumns={1}
         horizontal= {false}
@@ -122,15 +113,9 @@ export default function Random(props) {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
           console.log(item.name + ' ' + item.matched)
-            
-
           // if user is noti the current user and user isn't already matched, flat list
           if (item.id != authentication.currentUser.email && !item.matched) {
-            // const docRef = doc(db, "users", item.id);
-            // getDoc(docRef)
-            // .then((doc) => {
-            //     setMatched(doc.get('matched'))
-            // })
+
             
             return (
               <TouchableOpacity
@@ -146,31 +131,52 @@ export default function Random(props) {
                 </View>
   
                 <View style={styles.cardSection}>
-                <Text style={styles.about}> {item.gender} </Text>
-                {/* display matched/unmatched status */}
-                {item.matched
-                  ? <Text style={styles.about}> matched </Text>
-                  : <Text style={styles.about}> unmatched </Text>}
-                 
-                <Text style={styles.about}> online </Text>
+
+                    <View style={styles.aboutContainer}>
+                      <Text style={styles.about}> {item.gender} </Text>
+                    </View>
+
+                    {/* display matched/unmatched status */}
+                    {item.matched == null
+
+                      ? 
+                      
+                      <View style={styles.aboutContainer}>
+                        <Text style={styles.about}> unmatched </Text>
+                      </View>
+                      
+                      : 
+
+                      <View style={styles.aboutContainer}>
+                        <Text style={styles.about}> matched </Text>
+                      </View>}
+
+                    <View style={styles.aboutContainer}>
+                      <Text style={styles.about}> online </Text>
+                    </View>
+
+
                 </View>
 
                 { (isRequesting == item.id) ? (
                   <TouchableOpacity
                     style={{
-                      backgroundColor: 'light gray',
+                      backgroundColor: '#d3d3d3',
                       ...styles.button,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+
                       
                     }}
                     onPress={() => noRequest(item)}>
-                    <Text style={styles.buttonText}>Requesting</Text>
+                    <Text style={{color: 'grey', fontWeight: 'bold'}}>Requesting</Text>
                   </TouchableOpacity>)
                   :
                   ( <TouchableOpacity
-                    style={[styles.button, styles.profile]}
-                    onPress={() => handleRequest(item)}>
-                    <Text style={styles.buttonText}>Request</Text>
-                  </TouchableOpacity>
+                      style={[styles.button, styles.profile]}
+                      onPress={() => handleRequest(item)}>
+                      <Text style={styles.buttonText}>Request</Text>
+                    </TouchableOpacity>
                   )}
                 
               </TouchableOpacity> 
@@ -181,6 +187,132 @@ export default function Random(props) {
     </View>
   )
 }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#eef1e1',
+//     //marginBottom: 100, 
+//   },
+//   formContent: {
+//     flexDirection: 'row',
+//     marginTop: 30,
+//   },
+//   inputContainer: {
+//     borderBottomColor: '#F5FCFF',
+//     backgroundColor: '#FFFFFF',
+//     borderRadius: 30,
+//     borderBottomWidth: 1,
+//     height: 45,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     flex: 1,
+//     margin: 10,
+//   },
+//   icon: {
+//     width: 30,
+//     height: 30,
+//   },
+//   iconBtnSearch: {
+//     alignSelf: 'center',
+//   },
+//   inputs: {
+//     height: 45,
+//     marginLeft: 16,
+//     borderBottomColor: '#FFFFFF',
+//     flex: 1,
+//   },
+//   inputIcon: {
+//     marginLeft: 15,
+//     justifyContent: 'center',
+//   },
+//   notificationList: {
+//     marginTop: 20,
+//     padding: 10,
+//   },
+//   card: {
+//     height: null,
+//     paddingTop: 10,
+//     paddingBottom: 10,
+//     marginTop: 5,
+//     backgroundColor: '#FFFFFF',
+//     flexDirection: 'column',
+//     borderTopWidth: 40,
+//     marginBottom: 20,
+//   },
+//   cardContent: {
+//     flexDirection: 'row',
+//     marginLeft: 10,
+//   },
+//   cardSection: {
+//     flexDirection: 'row',
+//     marginLeft: 60,
+//     marginTop: 5, 
+//   },
+//   imageContent: {
+//     marginTop: -40,
+//   },
+//   tagsContent: {
+//     marginTop: 10,
+//     flexWrap: 'wrap',
+//   },
+//   image: {
+//     width: 60,
+//     height: 60,
+//     borderRadius: 30,
+//   },
+//   name: {
+//     fontSize: 20,
+//     fontWeight: 'bold',
+//     marginLeft: 10,
+//     alignSelf: 'center',
+//   },
+//   about: {
+//     fontSize: 16,
+//     //fontWeight: 'bold',
+//     marginLeft: 10,
+//     alignSelf: 'center',
+//   },
+//   btnColor: {
+//     padding: 10,
+//     borderRadius: 40,
+//     marginHorizontal: 3,
+//     backgroundColor: '#eee',
+//     marginTop: 5,
+//   },
+//    button: {
+//     height: 35,
+//     flexDirection: 'row',
+//     justifyContent: 'centre',
+//     alignItems: 'centre',
+//     borderRadius: 10,
+//     width: 100,
+//     marginRight: 20,
+//     marginLeft: 250,
+//     marginTop: 5,
+//     //backgroundColor: '#007788'
+//   },
+//   startbutton: {
+//     height: 35,
+//     borderRadius: 100,
+//     width: 130,
+//     marginTop: 5,
+//     marginLeft: 10, 
+//     backgroundColor: '#007788',
+    
+//   },
+//    profile: {
+//     backgroundColor: '#007788',
+//   },
+//   buttonText: {
+//     color: '#f6f6f6',
+//     fontWeight: 'bold',
+//     textAlign: 'center',
+//     marginLeft: 11, 
+//     marginTop: 8,
+    
+//   },
+// })
 
 const styles = StyleSheet.create({
   container: {
@@ -225,7 +357,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   card: {
-    height: null,
+    height: 160,
     paddingTop: 10,
     paddingBottom: 10,
     marginTop: 5,
@@ -233,6 +365,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     borderTopWidth: 40,
     marginBottom: 20,
+    marginHorizontal: 10
   },
   cardContent: {
     flexDirection: 'row',
@@ -241,7 +374,7 @@ const styles = StyleSheet.create({
   cardSection: {
     flexDirection: 'row',
     marginLeft: 60,
-    marginTop: 5, 
+    //marginTop: 5, 
   },
   imageContent: {
     marginTop: -40,
@@ -256,16 +389,30 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   name: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     marginLeft: 10,
     alignSelf: 'center',
+    top: 3
   },
   about: {
     fontSize: 16,
     //fontWeight: 'bold',
-    marginLeft: 10,
+    //marginLeft: 10,
     alignSelf: 'center',
+    //padding: 12,
+    borderRadius: 100
+  },
+  aboutContainer: {
+    left: -50,
+    top: 27,
+    backgroundColor: '#ECECEC',
+    margin: 3,
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
+    borderRadius: 20
   },
   btnColor: {
     padding: 10,
@@ -279,11 +426,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'centre',
     alignItems: 'centre',
+    alignContent: 'center',
     borderRadius: 10,
     width: 100,
-    marginRight: 20,
+    //marginRight: 20,
     marginLeft: 250,
-    marginTop: 5,
+    bottom: 70
+    //marginTop: 5,
     //backgroundColor: '#007788'
   },
   startbutton: {
@@ -296,14 +445,16 @@ const styles = StyleSheet.create({
     
   },
    profile: {
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#007788',
   },
   buttonText: {
     color: '#f6f6f6',
     fontWeight: 'bold',
     textAlign: 'center',
-    marginLeft: 11, 
-    marginTop: 8,
+    //marginLeft: 11, 
+    //marginTop: 8,
     
   },
 })

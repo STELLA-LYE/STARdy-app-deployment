@@ -51,7 +51,7 @@ const styles=StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         //backgroundColor: 'pink',
-        marginTop: -110
+        //marginTop: -110
     },
     button: {
         backgroundColor: '#007788',
