@@ -52,13 +52,13 @@ export default function Tasks({route, navigation}) {
 
   function doTasks(item) {
     if (item.id == 1) {
-      return ()=> navigation.navigate('Evidence', {otherUserID: uid, otherUserEmail: email, currentUser: authentication.currentUser.uid }); 
+      return ()=> navigation.navigate('Goals');  
     } else if (item.id == 2) {
-      return ()=> navigation.navigate('Verify',{otherUserEmail: email, otherUserID: uid,}); 
+      return ()=> navigation.navigate('Evidence', {otherUserID: uid, otherUserEmail: email, currentUser: authentication.currentUser.uid });
     } else if (item.id == 3) {
       return ()=> navigation.navigate('Encouragement Msg'); 
     } else {
-      return ()=> navigation.navigate('Goals'); 
+      return ()=> navigation.navigate('Verify',{otherUserEmail: email, otherUserID: uid,});  
     }
   }
 
