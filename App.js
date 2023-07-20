@@ -122,7 +122,7 @@ export default function App() {
             <Stack.Screen name='Evidence' component={Evidence} /> 
             <Stack.Screen name='Verify' component={Verify} /> 
             <Stack.Screen name='Goals' component={Goals} /> 
-            <Stack.Screen name='Encouragement Msg' component={EncourageMessage} /> 
+            <Stack.Screen name='Encouragement' component={EncourageMessage} /> 
             <Stack.Screen name='Home' component={Home} /> 
             
           </Stack.Navigator>

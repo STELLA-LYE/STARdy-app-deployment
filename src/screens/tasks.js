@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Button, Image, Modal, TouchableWithoutFeedback, FlatList} from 'react-native'
+import { StyleSheet, Text, View, Button, Image, Modal, TouchableWithoutFeedback, FlatList, TouchableOpacity, Alert} from 'react-native'
 import React, { useState, useCallback, useEffect } from 'react'
 import { GiftedChat, Bubble, Send, RenderMessageImageProps } from 'react-native-gifted-chat'
 import { addDoc, collection, serverTimestamp , doc, onSnapshot, query, orderBy, setDoc, getDoc} from 'firebase/firestore';
@@ -7,12 +7,43 @@ import { Icon } from '@rneui/themed';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { saveMediaToStorage } from '../services/random';
 import { saveUserProfileImage, saveUserChatImage } from '../services/user';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useFocusEffect } from '@react-navigation/native';
+// import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default function Tasks({route, navigation}) {
   const currentUser = authentication?.currentUser?.uid;
   const uid = route.params.uid
   const email = route.params.email
+  const matched = route.params.matched
+  const [startDate, setStartDate] = useState(0);
+  const [currentDate, setCurrentDate] = useState(0);
+  const [deadline, setDeadline] = useState(0);
+  
+  useFocusEffect(
+    useCallback(() => {
+      const docRef = doc(db, 'focusSession', authentication.currentUser.uid, 'partners', uid);
+      getDoc(docRef)
+        .then((doc) => {
+          setStartDate(doc.get('start'))
+          console.log(doc.get('start'))
+      }
+      )
+      setCurrentDate(new Date().getDate());
+      console.log('matched: ' + matched)
+      console.log(currentDate);
+      
+
+    }, [])
+  )
+
+  useEffect(() => {
+    setDeadline(startDate + 1);
+    console.log(deadline);
+  }, [startDate])
+
+ 
+
+
 
   const items = [
     {
@@ -56,10 +87,14 @@ export default function Tasks({route, navigation}) {
     } else if (item.id == 2) {
       return ()=> navigation.navigate('Evidence', {otherUserID: uid, otherUserEmail: email, currentUser: authentication.currentUser.uid });
     } else if (item.id == 3) {
-      return ()=> navigation.navigate('Encouragement Msg'); 
+      return ()=> navigation.navigate('Encouragement'); 
     } else {
       return ()=> navigation.navigate('Verify',{otherUserEmail: email, otherUserID: uid,});  
     }
+  }
+
+  const sendAlert = () => {
+    Alert.alert('Deadline Passed')
   }
 
   return (
@@ -70,6 +105,7 @@ export default function Tasks({route, navigation}) {
       <FlatList
         data={items}
         renderItem={({ item }) => (
+         
           <View style={styles.card}>
             <View style={styles.item}>
               
@@ -82,9 +118,19 @@ export default function Tasks({route, navigation}) {
             </View>
 
             <View style={styles.buttons}>
-              <TouchableOpacity style={styles.button} onPress={doTasks(item)}>
-                <Text style={styles.buttonText}> check </Text>
+            
+              {/* { (item.name != "Task 2" || matched == authentication.currentUser.uid)
+                ? <TouchableOpacity style={{backgroundColor: '#007788', ...styles.button}} onPress={doTasks(item)}>
+                    <Text style={styles.buttonText}> View </Text>
+                  </TouchableOpacity>
+                :<TouchableOpacity style={{backgroundColor: 'grey', ...styles.button}} onPress={sendAlert}>
+                    <Text style={styles.buttonText}> View </Text>
+                  </TouchableOpacity>
+              } */}
+              <TouchableOpacity style={{backgroundColor: '#007788', ...styles.button}} onPress={doTasks(item)}>
+                    <Text style={styles.buttonText}> View </Text>
               </TouchableOpacity>
+              
             </View>
           </View>
         )}
@@ -152,7 +198,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   button: {
-    backgroundColor: '#007788',
     borderRadius: 5,
     padding: 10,
     marginRight: 10,

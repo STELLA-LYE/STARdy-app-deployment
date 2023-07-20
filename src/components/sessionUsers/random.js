@@ -6,99 +6,97 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  TextInput,
   FlatList,
-  AppState,
 } from 'react-native'
 
 import { useFocusEffect } from '@react-navigation/native';
 
 //firebase 
-import { storage } from '../../../config';
-import { ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage';
 import { db, authentication } from '../../../config';
+import { doc, getDoc, getDocs, query, collection, setDoc} from "firebase/firestore";
+import { queryUsersByMajorAndYear, request } from '../../api/firestore';
 
-import { doc, getDoc, get, where, Filter, getDocs, query, collection, setDoc} from "firebase/firestore";
-
-export default function Random(props) {
+export default function Random() {
 
   const [users, setUsers] = useState([])
-
-
-  const[name, setName] = useState('')
   const[major, setMajor] = useState('')
   const[year, setYear] = useState('')
-  const[gender, setGender] = useState('')
-  const[photoURL, setPhotoURL] = useState(null);
-  const [userID, setUserID] = useState(authentication.currentUser.uid);
-  const [isRequesting, setIsRequesting] = useState(null);
-  const [matched, setMatched] = useState(null);
-
-  const docRef = doc(db, "users", authentication.currentUser.email);
-
-  
+  const [userRequesting, setUserRequesting] = useState([]);
+  const [requested, setRequested] = useState(null);
+  const [currUserName, setCurrUserName] = useState(null);
+  const [currUserGender, setCurrUserGender] = useState(null);
+  const [currUserYear, setCurrUserYear] = useState(null);
+  const [currUserMajor, setCurrUserMajor] = useState(null);
+  const [currUserUID, setCurrUserUID] = useState(null);
+  const [currUserPhotoURL, setCurrUserPhotoURL] = useState(null);
 
   // filter 
   useEffect(() => {
-    // const q = query(collection(db, "users"), where("major", "==", major), where("year", "==", year));
-    const q = query(collection(db, "users"), where("major", ">=", major), where("year", "==", year),  where("appState", "==", "active"));
-    getDocs(q)
-        .then((snapshot) => {
-          let users = snapshot.docs.map(doc => {
-              const data = doc.data(); 
-              const id = doc.id; 
-              return { id, ...data }
-          }); 
-          setUsers(users);
-          console.log(users);
+    queryUsersByMajorAndYear(major, year)
+      .then(setUsers)
+  
+  },[])
+
+  // useEffect(() => {
+  //   const q = query(collection(db, "requesting", authentication.currentUser.uid, "requestingUsers"));
+  //   getDocs(q)
+  //     .then((snapshot) => {
+  //       let users = snapshot.docs.map(doc => {
+  //         console.log('id: ' + doc.id);
+  //         const id = doc.id 
+  //         return id; 
+  //       }); 
+  //     setUserRequesting(users);
+      
+  //   })
+  // }, [requested])
+  useFocusEffect(
+    useCallback(() => {
+      const docRef = doc(db, "users", authentication.currentUser.uid);
+      getDoc(docRef)
+        .then((doc) => {
+          setCurrUserName(doc.get('name'))
+          setCurrUserGender(doc.get('gender'))
+          setCurrUserMajor(doc.get('major'))
+          setCurrUserYear(doc.get('year'))
+          setCurrUserUID(doc.get('userID'))
+          setCurrUserPhotoURL(doc.get('photoURL'))
         })
-  },[major, year])
+
+    }, [])
+  )
+
+  useFocusEffect(
+    useCallback(() => {
+      const q = query(collection(db, "requesting", authentication.currentUser.uid, "requestingUsers"));
+      getDocs(q)
+      .then((snapshot) => {
+        let users = snapshot.docs.map(doc => {
+          const id = doc.id 
+          return id; 
+        }); 
+      setUserRequesting(users);
+      
+    })
+     }, [requested])
+  )
 
   // retrieve and update
   useFocusEffect(
     useCallback(() => {
+      const docRef = doc(db, "users", authentication.currentUser.uid);
       getDoc(docRef)
       .then((doc) => {
-          setName(doc.get('name'))
           setMajor(doc.get('major'))
           setYear(doc.get('year'))
-          setGender(doc.get('gender'))
-          setPhotoURL(doc.get('photoURL'))
       })
      }, [])
   )
 
-  const cardClickEventListener = item => {
-    Alert.alert(item.name)
+  const onRequestPressed = (item, currUserName, currUserGender, currUserYear, currUserMajor, currUserPhotoURL, currUserUID) => {
+    request(item, currUserName, currUserGender, currUserYear, currUserMajor, currUserPhotoURL, currUserUID);
+    setRequested(item.id);
   }
-
-  // getDoc(docRef)
-  //               .then((doc) => {
-  //                   setName(doc.get('name'))
-  //                   setMajor(doc.get('major'))
-  //                   setYear(doc.get('year'))
-  //                   setGender(doc.get('gender'))
-  //                   setPhotoURL(doc.get('photoURL'))  
-  //                   //console.log(photoURL)
-  //               })
-
-  // send request (i.e. data of current user requesting)
-  handleRequest = (item) => {
-    setIsRequesting(item.id);
-    const docRef = doc(db, "requests", item.id, "userRequests", authentication.currentUser.email);
-    setDoc(docRef, {
-      name: name,
-      gender: gender,
-      year: year,
-      major: major,
-      photoURL: photoURL,
-      userID: authentication.currentUser.uid,
-      email: authentication.currentUser.email
-    })
-    Alert.alert("Request sent!", `Please wait for ${item.name} to accept your request.`)
-  }
-
-  noRequest = (item) => Alert.alert('Already Requested!', `Wait for ${item.name} to accept your request.`)
   
   //Frontend for Random 
 
@@ -115,20 +113,15 @@ export default function Random(props) {
         renderItem={({ item }) => {
           console.log(item.name + ' ' + item.matched)
           // if user is noti the current user and user isn't already matched, flat list
-          if (item.id != authentication.currentUser.email && !item.matched) {
+          if (item.id != authentication.currentUser.uid) {
 
             
             return (
-              <TouchableOpacity
-                style={[styles.card, { borderColor:'#007788' }]}
-                onPress={() => {
-                  cardClickEventListener(item)
-                }}>
+              <View style={[styles.card, { borderColor:'#007788' }]}>
                
                 <View style={styles.cardContent}>
                   <Image style={[styles.image, styles.imageContent]} source={{ uri: item.photoURL }} />
                   <Text style={styles.name}> {item.name} </Text>
-                  {/* <Text style={styles.about}> {item.gender} </Text> */}
                 </View>
   
                 <View style={styles.cardSection}>
@@ -151,15 +144,20 @@ export default function Random(props) {
                       <View style={styles.aboutContainer}>
                         <Text style={styles.about}> matched </Text>
                       </View>}
-
-                    <View style={styles.aboutContainer}>
-                      <Text style={styles.about}> online </Text>
-                    </View>
+                    
+                    {item.AppState == 'active' 
+                      ? <View style={styles.aboutContainer}>
+                          <Text style={styles.about}> online </Text>
+                        </View>
+                      : <View style={styles.aboutContainer}>
+                          <Text style={styles.about}> offline </Text>
+                        </View> }
+                    
 
 
                 </View>
 
-                { (isRequesting == item.id) ? (
+                { (userRequesting.indexOf(item.id) > -1) ? (
                   <TouchableOpacity
                     style={{
                       backgroundColor: '#d3d3d3',
@@ -169,18 +167,18 @@ export default function Random(props) {
 
                       
                     }}
-                    onPress={() => noRequest(item)}>
+                    >
                     <Text style={{color: 'grey', fontWeight: 'bold'}}>Requesting</Text>
                   </TouchableOpacity>)
                   :
                   ( <TouchableOpacity
                       style={[styles.button, styles.profile]}
-                      onPress={() => handleRequest(item)}>
+                      onPress={() => onRequestPressed(item, currUserName, currUserGender, currUserYear, currUserMajor, currUserPhotoURL, currUserUID)}>
                       <Text style={styles.buttonText}>Request</Text>
                     </TouchableOpacity>
                   )}
                 
-              </TouchableOpacity> 
+                </View> 
             )
           }
         }}
@@ -233,7 +231,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   card: {
-    height: 160,
+    //height: 160,
     paddingTop: 10,
     paddingBottom: 10,
     marginTop: 5,

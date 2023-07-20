@@ -1,8 +1,10 @@
 import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { collection, onSnapshot, where, query } from 'firebase/firestore'
+import { collection, onSnapshot, where, query, getDocs } from 'firebase/firestore'
 import { authentication, db } from '../../config'
 import { ListItem } from '../components/tasks/listItem'
+import { useFocusEffect } from '@react-navigation/native'
+import { useCallback } from 'react'
 
 export default function Home({navigation}) {
   const [users, setUsers] = useState([]);
@@ -15,7 +17,7 @@ export default function Home({navigation}) {
   }
  
   const getUsers =  () => {
-    const docsRef = collection(db, 'focusSession', authentication.currentUser.email, 'partners');
+    const docsRef = collection(db, 'focusSession', authentication.currentUser.uid, 'partners');
     const q =  query(docsRef, where('active', '==', true));
     const docsSnap = onSnapshot(q, (onSnap) => {
       let data = [];
@@ -26,11 +28,42 @@ export default function Home({navigation}) {
     })
   }
 
-  useEffect(() => {
-    getUsers();
-    console.log(users);
-  },[])
+  const fetchUsers = () => new Promise((resolve, reject) => {
+    // const q = query(collection(db, "evidence", otherUserID, "images"), where("partner", "==", authentication.currentUser.uid));
+    // getDocs(q)
+    //    .then((snapshot) => {
+    //      let evidence = snapshot.docs.map(doc => {
+    //          const data = doc.data(); 
+    //          const id = doc.id; 
+    //          return { id, ...data }
+    //      });
+    //      resolve(evidence);
+    //    })
+    //    .catch(() => reject())
 
+    const docsRef = collection(db, 'focusSession', authentication.currentUser.uid, 'partners');
+    const q =  query(docsRef, where('active', '==', true));
+    getDocs(q)
+       .then((snapshot) => {
+         let evidence = snapshot.docs.map(doc => {
+             const data = doc.data(); 
+             const id = doc.id; 
+             return { id, ...data }
+         });
+         resolve(evidence);
+         console.log(evidence);
+       })
+       .catch(() => reject())
+
+  })
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUsers()
+        .then(setUsers)
+    }, [])
+  )
+  
 
   return (
     <View style={styles.container}>
@@ -50,14 +83,9 @@ export default function Home({navigation}) {
       key={user => user.email}
       renderItem={({item}) => 
           {
-            // console.log(item.matched)
-            //console.log(item.userID)
-            
-            // console.log(authentication.currentUser.uid)
-            // only display chats of users that are matched with the current user
               return (
                 <ListItem 
-                  onPress={() => navigation.navigate('Task', {name:item.name, uid:item.userID, userAvatar:item.photoURL, email: item.email})}
+                  onPress={() => navigation.navigate('Task', {name:item.name, uid:item.userID, userAvatar:item.photoURL, email: item.email, matched: item.matched})}
                   title={item.name}
                   image={item.photoURL}
                   />

@@ -1,117 +1,3 @@
-// import React, { Component, useState } from 'react'
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   TouchableOpacity,
-//   Image,
-//   Alert,
-//   TextInput,
-//   FlatList,
-// } from 'react-native'
-
-
-// export default Friends = () => {
-
-//    showAlert = () => Alert.alert('Request', 'Sending your request!' )
-
-//   const optionList = [
-//     {
-//       id: 1,
-//       color: '#007788',
-//       icon: 'https://bootdey.com/img/Content/avatar/avatar5.png',
-//       name: 'Friend 1',
-//       tags: ['M', 'unmatched'],
-//     },
-//     {
-//       id: 2,
-//       color: '#007788',
-//       icon: 'https://bootdey.com/img/Content/avatar/avatar2.png',
-//       name: 'Friend 2',
-//       tags: ['M', 'unmatched'],
-//     },
-//     {
-//       id: 3,
-//       color: '#007788',
-//       icon: 'https://bootdey.com/img/Content/avatar/avatar3.png',
-//       name: 'Friend 3',
-//       tags: ['F', 'unmatched'],
-//     },
-//     {
-//       id: 4,
-//       color: '#007788',
-//       icon: 'https://bootdey.com/img/Content/avatar/avatar7.png',
-//       name: 'Friend 4',
-//       tags: ['M', 'unmatched'],
-//     },
-//   ]
-
-//   const [options, setOptions] = useState(optionList)
-//   const [query, setQuery] = useState()
-
-//   const cardClickEventListener = item => {
-//     Alert.alert(item.name)
-//   }
-
-//   const tagClickEventListener = tagName => {
-//     if (tagName == 'matched') {
-//       Alert.alert('User is already matched, unable to send request!')
-//     } else {
-//       Alert.alert(tagName)
-//     }
-//   }
-
-
-//   const renderTags = item => {
-//     return item.tags.map((tag, key) => {
-//       return (
-//         <TouchableOpacity
-//           key={key}
-//           style={styles.btnColor}
-//           onPress={() => tagClickEventListener(tag)}>
-//           <Text>{tag}</Text>
-//         </TouchableOpacity>
-//       )
-//     })
-//   }
-
-//   return (
-//     <View style={styles.container}>
-    
-//       <FlatList
-//         style={styles.notificationList}
-//         data={options}
-//         keyExtractor={item => {
-//           return item.id
-//         }}
-//         renderItem={({ item }) => {
-//           return (
-//             <TouchableOpacity
-//               style={[styles.card, { borderColor: item.color }]}
-//               onPress={() => {
-//                 cardClickEventListener(item)
-//               }}>
-//               <View style={styles.cardContent}>
-//                 <Image style={[styles.image, styles.imageContent]} source={{ uri: item.icon }} />
-//                 <Text style={styles.name}>{item.name}</Text>
-
-//                 <TouchableOpacity
-//                   style={[styles.button, styles.profile]}
-//                   onPress={showAlert}>
-//                   <Text style={styles.buttonText}>Request</Text>
-//                 </TouchableOpacity>
-
-//               </View>
-              
-//               <View style={[styles.cardContent, styles.tagsContent]}>{renderTags(item)}</View>
-//             </TouchableOpacity>
-//           )
-//         }}
-//       />
-//     </View>
-//   )
-// }
-
 import React, { Component, useEffect, useState, useCallback } from 'react'
 import {
   StyleSheet,
@@ -128,94 +14,87 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 
 //firebase 
-import { storage } from '../../../config';
-import { ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage';
 import { db, authentication } from '../../../config';
+import { doc, getDocs, query, collection, setDoc, getDoc} from "firebase/firestore";
+import { fetchUserFriends, request } from '../../api/firestore';
+import { TouchableHighlight } from 'react-native-gesture-handler';
 
-import { doc, getDoc, get, where, Filter, getDocs, query, collection, setDoc} from "firebase/firestore";
+export default function Friends() {
 
-export default function Friends(props) {
+  const [users, setUsers] = useState([]);
+  const [userRequesting, setUserRequesting] = useState([]); 
+  const [requested, setRequested] = useState(null);
+  const [currUserName, setCurrUserName] = useState(null);
+  const [currUserGender, setCurrUserGender] = useState(null);
+  const [currUserYear, setCurrUserYear] = useState(null);
+  const [currUserMajor, setCurrUserMajor] = useState(null);
+  const [currUserUID, setCurrUserUID] = useState(null);
+  const [currUserPhotoURL, setCurrUserPhotoURL] = useState(null);
 
-  const [users, setUsers] = useState([])
-
-
-  const[name, setName] = useState('')
-  const[major, setMajor] = useState('')
-  const[year, setYear] = useState('')
-  const[gender, setGender] = useState('')
-  const[photoURL, setPhotoURL] = useState(null);
-  const [userID, setUserID] = useState(authentication.currentUser.uid);
-  const [isRequesting, setIsRequesting] = useState(null);
-  const [matched, setMatched] = useState(null);
-
-  const docRef = doc(db, "users", authentication.currentUser.email);
-
-  
-
-  // filter 
-  useEffect(() => {
-    const q = query(collection(db, "friends", authentication.currentUser.email, "userFriends"));
-    getDocs(q)
-        .then((snapshot) => {
-          let users = snapshot.docs.map(doc => {
-              const data = doc.data(); 
-              const id = doc.id; 
-              return { id, ...data }
-          }); 
-          setUsers(users);
-          console.log(users);
-        })
-  },[major, year])
-
-
-  // retrieve and update
+  //filter 
+  // useEffect(() => {
+  //   const q = query(collection(db, "requesting", authentication.currentUser.uid, "requestingUsers"));
+  //   getDocs(q)
+  //     .then((snapshot) => {
+  //       let users = snapshot.docs.map(doc => {
+  //         console.log('id: ' + doc.id);
+  //         const id = doc.id 
+  //         return id; 
+  //       }); 
+  //     setUserRequesting(users);
+      
+  //   })
+  // },[requested])
   useFocusEffect(
     useCallback(() => {
+      const q = query(collection(db, "requesting", authentication.currentUser.uid, "requestingUsers"));
+      getDocs(q)
+      .then((snapshot) => {
+        let users = snapshot.docs.map(doc => {
+          console.log('id: ' + doc.id);
+          const id = doc.id 
+          return id; 
+        }); 
+      setUserRequesting(users);
+      
+    })
+     }, [requested]),
+  )
+
+  useFocusEffect(
+    useCallback(() => {
+      const docRef = doc(db, "users", authentication.currentUser.uid);
       getDoc(docRef)
-      .then((doc) => {
-          setName(doc.get('name'))
-          setMajor(doc.get('major'))
-          setYear(doc.get('year'))
-          setGender(doc.get('gender'))
-          setPhotoURL(doc.get('photoURL'))
-      })
+        .then((doc) => {
+          setCurrUserName(doc.get('name'))
+          setCurrUserGender(doc.get('gender'))
+          setCurrUserMajor(doc.get('major'))
+          setCurrUserYear(doc.get('year'))
+          setCurrUserUID(doc.get('userID'))
+          setCurrUserPhotoURL(doc.get('photoURL'))
+        })
+
+    }, [])
+  )
+
+  // retrieve and update current user name
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserFriends()
+      .then(setUsers)
      }, [])
   )
 
-  const cardClickEventListener = item => {
-    Alert.alert(item.name)
+  const onRequestPressed = (item, currUserName, currUserGender, currUserYear, currUserMajor, currUserPhotoURL, currUserUID) => {
+    request(item, currUserName, currUserGender, currUserYear, currUserMajor, currUserPhotoURL, currUserUID);
+    setRequested(item.id);
   }
-
-  // getDoc(docRef)
-  //               .then((doc) => {
-  //                   setName(doc.get('name'))
-  //                   setMajor(doc.get('major'))
-  //                   setYear(doc.get('year'))
-  //                   setGender(doc.get('gender'))
-  //                   setPhotoURL(doc.get('photoURL'))  
-  //                   //console.log(photoURL)
-  //               })
-
-  // send request (i.e. data of current user requesting)
-  handleRequest = (item) => {
-    setIsRequesting(item.id);
-    const docRef = doc(db, "requests", item.id, "userRequests", authentication.currentUser.email);
-    setDoc(docRef, {
-      name: name,
-      gender: gender,
-      year: year,
-      major: major,
-      photoURL: photoURL,
-      userID: authentication.currentUser.uid,
-      email: authentication.currentUser.email
-    })
-  }
-
-  noRequest = (item) => Alert.alert('Already Requested!', `Wait for ${item.name} to accept your request.`)
   
   //Frontend for Random 
 
   return (
+
+    
 
     <View style={styles.container}>
 
@@ -226,16 +105,14 @@ export default function Friends(props) {
         extraData={users}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
-          console.log('email' + item.id);
+          // console.log(item.name + ' ' + userRequests.indexOf(item.id));
+          // console.log(userRequests);
+          //console.log('email' + item.id);
           // if user is noti the current user and user isn't already matched, flat list
-          if (item.id != authentication.currentUser.email && !item.matched) {
+          if (item.id != authentication.currentUser.email) {
             return (
-              <TouchableOpacity
-                style={[styles.card, { borderColor:'#007788' }]}
-                onPress={() => {
-                  cardClickEventListener(item)
-                }}>
-               
+              <View style={[styles.card, { borderColor:'#007788' }]}>
+      
                 <View style={styles.cardContent}>
                   <Image style={[styles.image, styles.imageContent]} source={{ uri: item.photoURL }} />
                   <Text style={styles.name}> {item.name} </Text>
@@ -263,35 +140,37 @@ export default function Friends(props) {
                       <Text style={styles.about}> matched </Text>
                     </View>}
                   
-                  <View style={styles.aboutContainer}>
-                    <Text style={styles.about}> online </Text>
-                  </View>
+                    {item.AppState == 'active' 
+                      ? <View style={styles.aboutContainer}>
+                          <Text style={styles.about}> online </Text>
+                        </View>
+                      : <View style={styles.aboutContainer}>
+                          <Text style={styles.about}> offline </Text>
+                        </View> }
                 
 
                 </View>
 
-                { (isRequesting == item.id) ? (
-                  <TouchableOpacity
+                { (userRequesting.indexOf(item.id) > -1) ? (
+                  <TouchableHighlight
                     style={{
                       backgroundColor: '#d3d3d3',
                       ...styles.button,
                       justifyContent: 'center',
                       alignItems: 'center',
-
-                      
                     }}
-                    onPress={() => noRequest(item)}>
+                    >
                     <Text style={{color: 'grey', fontWeight: 'bold'}}>Requesting</Text>
-                  </TouchableOpacity>)
+                  </TouchableHighlight>)
                   :
                   ( <TouchableOpacity
                       style={[styles.button, styles.profile]}
-                      onPress={() => handleRequest(item)}>
+                      onPress={() => onRequestPressed(item, currUserName, currUserGender, currUserYear, currUserMajor, currUserPhotoURL, currUserUID)}>
                       <Text style={styles.buttonText}>Request</Text>
                     </TouchableOpacity>
                   )}
                 
-              </TouchableOpacity> 
+                </View>
             )
           }
         }}
@@ -343,7 +222,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   card: {
-    height: 160,
+    //height: 160,
     paddingTop: 10,
     paddingBottom: 10,
     marginTop: 5,
@@ -444,6 +323,7 @@ const styles = StyleSheet.create({
     
   },
 })
+
 
                   
 

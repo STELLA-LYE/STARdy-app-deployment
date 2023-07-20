@@ -51,7 +51,7 @@ const styles=StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         //backgroundColor: 'pink',
-        //marginTop: -110
+        marginTop: -30
     },
     button: {
         backgroundColor: '#007788',
@@ -60,7 +60,6 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 12,
-        //marginBottom: 
     },
     text: {
         color: '#f6f6f6',

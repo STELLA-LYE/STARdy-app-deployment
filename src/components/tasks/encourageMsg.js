@@ -90,15 +90,16 @@ const EncourageMessage = () => {
       </Text>
 
       <FontAwesome5 name="hands-helping" size={150} color="#007788" marginTop={60} marginBottom={50}/>
-      <Image source={require('../../../assets/star-icon.png')} style={styles.image} />
+      {/* <Image source={require('../../../assets/star-icon.png')} style={styles.image} /> */}
       <Text
         style={{
           fontSize: 16,
           color: 'black',
           marginTop: 20,
           marginLeft: 20,
+          textAlign: 'center'
         }}>
-        Do only 'COMPLETE' this task once per focus session  
+        Only 'COMPLETE' this task once per focus session  
       </Text>
 
       <Text
@@ -107,8 +108,9 @@ const EncourageMessage = () => {
           color: '#007788',
           marginTop: 20,
           marginLeft: 20,
+          textAlign: 'center'
         }}>
-        Completed your recent task on {currentDate}, {currentTime} 
+        {`Completed your recent task on ${currentDate} ${currentTime}`}
       </Text>
 
       <View
@@ -122,7 +124,7 @@ const EncourageMessage = () => {
         <TouchableOpacity
           style={{
             width: '60%',
-            height: 50,
+            height: 70,
             backgroundColor: '#007788',
             justifyContent: 'center',
             alignItems: 'center',

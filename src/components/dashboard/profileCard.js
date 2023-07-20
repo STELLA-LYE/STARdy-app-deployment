@@ -39,7 +39,7 @@ const ProfileCard = ({ nav }) => {
     const [photoURL, setPhotoURL] = useState(null);
     const [updated, setUpdated] = useState(false);
 
-    const docRef = doc(db, "users", authentication.currentUser.email);
+    const docRef = doc(db, "users", authentication.currentUser.uid);
 
     useFocusEffect(
         useCallback(() => {

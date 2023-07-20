@@ -1,25 +1,17 @@
 import React, {useEffect, useState} from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, FlatList, Modal, TouchableWithoutFeedback, StyleSheet, Dimensions, Alert } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Animated } from 'react-native';
-import { storage } from '../../../config';
-import { ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage';
+import { View, Text, Image, TouchableOpacity, FlatList, Modal, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import { db, authentication } from '../../../config';
-import { doc, getDoc, get, where, Filter, getDocs, query, collection, setDoc, deleteDoc} from "firebase/firestore";
-
+import { doc, getDoc } from "firebase/firestore";
+import { fetchUserEvidence, verifyNo, verifyYes } from '../../api/firestore';
 
 const Verify = ({route, navigation}) => {
 
-    const { otherUserEmail, otherUserID } = route.params;
+    const { otherUserID } = route.params;
 
     const [evidence, setEvidence] = useState([]);
-    const currUserRef = doc(db, "users", authentication.currentUser.email);
-    const partnerRef = doc(db, "users", otherUserEmail);
-
     const [startDate, setStartDate] = useState(0);
     const [viewedImage, setViewedImage] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
-
     
     const viewImage = (imagePressed) => {
         setViewedImage(imagePressed)
@@ -27,161 +19,28 @@ const Verify = ({route, navigation}) => {
         setModalVisible(true);
     }
 
+    const closeModal = () => {
+      setModalVisible(false);
+      console.log(modalVisible)
+    } 
 
-    const verifyYes = async () => {
-
-      const currentDate = new Date().getDate();
-      const expectedSubmissionDate = startDate + 2;
-
-      if (currentDate <= expectedSubmissionDate) {
-        // current user gets 150 xp 
-        getDoc(currUserRef)
-        .then((doc) => {
-          const prevXP = doc.get('xp');
-          console.log(doc.get('xp'))
-          console.log('prevXP: '+ prevXP)
-          const newXP = prevXP + 150;
-          console.log('curr newXP: ' + newXP)
-          setDoc(currUserRef, {
-            xp: newXP
-          }, {merge: true}).then(() => {
-            // data saved successfully
-            console.log('data submitted');
-          }).catch((error) => {
-            //the write failed
-            console.log(error)
-          });
-
-        })
-
-        // partner gets 200 xp
-        getDoc(partnerRef)
-          .then((doc) => {
-            const prevXP = doc.get('xp');
-            const newXP = prevXP + 200;
-            setDoc(partnerRef, {
-              xp: newXP
-            }, {merge: true})
-          })
-
-        // end focus session and return to main page
-        Alert.alert("Thanks for verifying!", 
-        "This marks the end of your focus session. Check your XP accumulation under dashboard!",
-        [{
-          text: 'OK',
-          onPress: () => navigation.navigate('Main Tab')
-        }])
-        
-      } else { // missed deadline
-        // partner gets 200 XP
-        getDoc(partnerRef)
-        .then((doc) => {
-          const prevXP = doc.get('xp');
-          const newXP = prevXP + 200;
-          setDoc(partnerRef, {
-            xp: newXP
-          }, {merge: true})
-        })
-
-        Alert.alert("You've missed the deadline for verification :(", 
-        "Unfortunately you will not be getting any XP for verification. Don't miss the deadline next time!"
-        [{
-          text: 'OK',
-          onPress: () => navigation.navigate('Main Tab')
-        }])
-      }
-
-      // set active to false
-      const docRef = doc(db, "focusSession", authentication.currentUser.email, "partners", otherUserEmail);
-      await setDoc(docRef, {
-        active: false
-      }, { merge: true });
-      
+    const onYesPressed = () => {
+      verifyYes(startDate, otherUserID)
+      navigation.navigate('Main Tab')
     }
 
-
-    const verifyNo = async () => {
-
-      const currentDate = new Date().getDate();
-      const expectedSubmissionDate = startDate + 1;
-
-      await deleteDoc(doc(db, "focusSession", authentication.currentUser.email, "partners", otherUserEmail));
-
-      if (currentDate <= expectedSubmissionDate) {
-        // current user gets 150 xp
-        getDoc(currUserRef)
-        .then((doc) => {
-          const prevXP = doc.get('xp');
-          const newXP = prevXP + 150;
-          setDoc(currUserRef, {
-            xp: newXP
-          }, {merge: true})
-        })
-      
-        // partner loses 200 xp
-        getDoc(partnerRef)
-        .then((doc) => {
-          const prevXP = doc.get('xp');
-          const newXP = prevXP - 200;
-          setDoc(partnerRef, {
-            xp: newXP
-          }, {merge: true})
-        })
-
-        Alert.alert("Thanks for verifying!", 
-        "This marks the end of your focus session. Check your XP accumulation under dashboard!",
-        [{
-          text: 'OK',
-          onPress: () => navigation.navigate('Main Tab')
-        }])
-
-      } else {
-        // partner loses 200 XP
-        getDoc(partnerRef)
-        .then((doc) => {
-          const prevXP = doc.get('xp');
-          const newXP = prevXP + 200;
-          setDoc(partnerRef, {
-            xp: newXP
-          }, {merge: true})
-        })
-
-        Alert.alert("You've missed the deadline for verification XP :(", 
-        "Unfortunately you will not be getting any XP for verification. Don't miss the deadline next time!"
-        [{
-          text: 'OK',
-          onPress: () => navigation.navigate('Main Tab')
-        }])
-
-      }
-
-      // set active to false
-      const docRef = doc(db, "focusSession", authentication.currentUser.email, "partners", otherUserEmail);
-      await setDoc(docRef, {
-        active: false
-      }, { merge: true });
-      
-
-      
-    
+    const onNoPressed = () => {
+      verifyNo(startDate, otherUserID)
+      navigation.navigate('Main Tab')
     }
 
     // fetch user evidence data
     useEffect(() => {
-        const q = query(collection(db, "evidence", otherUserEmail, "images"), where("partner", "==", authentication.currentUser.uid));
-        getDocs(q)
-            .then((snapshot) => {
-              let evidence = snapshot.docs.map(doc => {
-                  const data = doc.data(); 
-                  const id = doc.id; 
-                  return { id, ...data }
-              }); 
-              setEvidence(evidence);
-              //console.log(evidence);
-            })
+        fetchUserEvidence(otherUserID)
+          .then(setEvidence);
 
-        const docRef = doc(db, "focusSession", authentication.currentUser.email, "partners", otherUserEmail);
-
+        // get start date
+        const docRef = doc(db, "focusSession", authentication.currentUser.uid, "partners", otherUserID);
         getDoc(docRef)
             .then((doc) => {
                 const s = doc.get('start')
@@ -190,14 +49,7 @@ const Verify = ({route, navigation}) => {
                 console.log('start: ' + startDate)
               
               }) 
-
     },[])
-
-    const closeModal = () => {
-        setModalVisible(false);
-        console.log(modalVisible)
-    }
-
 
   // front end
   return (
@@ -237,13 +89,13 @@ const Verify = ({route, navigation}) => {
     </View>
 
     <View style={styles.section}>
-        <TouchableOpacity style={styles.yesbutton} onPress={verifyYes}>
+        <TouchableOpacity style={styles.yesbutton} onPress={onYesPressed}>
             <Text style={styles.buttonText}>Yes</Text>
         </TouchableOpacity>
     </View>
 
     <View style={styles.section}>
-      <TouchableOpacity style={styles.nobutton} onPress={verifyNo} >
+      <TouchableOpacity style={styles.nobutton} onPress={onNoPressed} >
             <Text style={styles.buttonText}>No</Text>
         </TouchableOpacity>
     </View>
@@ -262,7 +114,7 @@ const Verify = ({route, navigation}) => {
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: 'rgba(0, 119, 136, 0.5)',
-            opacity: '5',
+            //opacity: '5',
             flex: 1
           }}>
             <Image

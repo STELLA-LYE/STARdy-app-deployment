@@ -10,6 +10,7 @@ import {
   Text,
   View,
   TouchableHighlight,
+  TouchableOpacity
 } from 'react-native';
 
 import { Entypo } from '@expo/vector-icons'; 
@@ -81,13 +82,13 @@ const FocusTimer = () => {
               {!isStopwatchStart ? 'START' : 'STOP'}
             </Text>
           </TouchableHighlight>
-          <TouchableHighlight
+          <TouchableOpacity
             onPress={() => {
               setIsStopwatchStart(false);
               setResetStopwatch(true);
             }}>
             <Text style={styles.buttonStop}>RESET</Text>
-          </TouchableHighlight>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
@@ -227,7 +228,7 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold',
     padding: 20,
   },
@@ -246,25 +247,26 @@ const styles = StyleSheet.create({
     marginTop: -50, 
   },
   buttonText: {
-    fontSize: 20,
+    fontSize: 14,
     marginTop: 10,
-    //fontWeight: 'bold'
+    fontWeight: 'bold',
     color: '#FAB972'
   },
   buttonStop: {
-    fontSize: 20,
+    fontSize: 14,
     marginTop: 10,
-    //fontWeight: 'bold'
-    color: '#89AAFF'
+    fontWeight: 'bold',
+    color: '#89AAFF',
+    //backgroundColor: 'white'
   },
   typeStop: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold', 
     color: '#89AAFF', 
     marginRight: 10, 
   },
   typeTimer: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold', 
     color: '#FAB972', 
     marginRight: 10, 
@@ -280,7 +282,7 @@ const options = {
     alignItems: 'center',
   },
   text: {
-    fontSize: 25,
+    fontSize: 23,
     color: '#FFF',
     marginLeft: 7,
     fontWeight: 'bold'

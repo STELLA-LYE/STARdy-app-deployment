@@ -18,10 +18,11 @@ import { storage } from '../../../config';
 import { ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage';
 import { db, authentication } from '../../../config';
 
+// import { doc, getDoc, get, where, Filter, collection, getDocs, query, serverTimestamp, setDoc} from "firebase/firestore";
+import { setDoc, doc, getDocs, query, collection, where, getDoc } from "firebase/firestore";
+import { addFriend, fetchUserFriends } from '../../api/firestore';
+
 import { queryUsersByName } from '../../services/random';
-
-import { doc, getDoc, get, where, Filter, collection, getDocs, query, serverTimestamp, setDoc} from "firebase/firestore";
-
 //each user display: profile picture, name, gender, major, year of study
 
 export default function Add() {
@@ -29,29 +30,39 @@ export default function Add() {
     const [users, setUsers] = useState([])
     const [searchParam, setSearchParam] = useState(null);
     const [isAdded, setIsAdded] = useState(false);
+    const [userFriends, setUserFriends] = useState([]);
+    const [lastFriendAdded, setLastFriendAdded] = useState(null);
 
   // search users by name
    useEffect(() => {
     queryUsersByName(searchParam)
       .then(setUsers)
 
+      console.log('users add: ' + users);
+    
    }, [searchParam])
 
-  //adding friends 
-  addFriend = (item) => {
-    setIsAdded(item.id)
-    console.log('test')
-    const docRef = doc(db, "friends", authentication.currentUser.email, "userFriends", item.id);
-    setDoc(docRef, {
-      friends: true,
-      name: item.name,
-      gender: item.gender,
-      year: item.year,
-      major: item.major,
-      photoURL: item.photoURL,
-      matched: item.matched     
-    })
-    Alert.alert("Friend added!", "Go to the friends page to start a focus session with your friend.")
+   useEffect(() => {
+    const q = query(collection(db, "friends", authentication.currentUser.uid, "userFriends"));
+    getDocs(q)
+        .then((snapshot) => {
+          let users = snapshot.docs.map(doc => {
+              const id = doc.id 
+              return id; 
+          }); 
+          setUserFriends(users);
+          console.log(users);
+        })
+   }, [lastFriendAdded])
+
+
+  const onAddPressed = (item) => {
+    addFriend(item)
+    setLastFriendAdded(item.userID)
+  }
+
+  const onAddedPressed = (item) => {
+    Alert.alert(item.name + ' is already added')
   }
 
 
@@ -97,7 +108,11 @@ export default function Add() {
         data={users}
         renderItem={({ item }) => {
 
-        {if (searchParam && item.email != authentication.currentUser.email) {
+
+
+  
+        {if (searchParam && item.email != authentication.currentUser.email) {         
+
             return (
       
               <TouchableOpacity
@@ -127,26 +142,28 @@ export default function Add() {
               
                 </View>
 
-                { (isAdded == item.id) ? (
-                  <TouchableOpacity
-                    style={{
-                      backgroundColor: '#d3d3d3',
-                      ...styles.button,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-
-                      
-                    }}
-                    onPress={() => noRequest(item)}>
-                    <Text style={{color: 'grey', fontWeight: 'bold'}}>Added</Text>
-                  </TouchableOpacity>)
-                  :
-                  ( <TouchableOpacity
-                      style={[styles.button, styles.profile]}
-                      onPress={() => addFriend(item)}>
-                      <Text style={styles.buttonText}>Add</Text>
+                { (userFriends.indexOf(item.userID) > -1) ? 
+                  (
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: '#d3d3d3',
+                        ...styles.button,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                      onPress={() => onAddedPressed(item)}>
+                      <Text style={{color: 'grey', fontWeight: 'bold'}}>Added</Text>
                     </TouchableOpacity>
-                  )}
+                  )
+                    :
+                  ( 
+                    <TouchableOpacity
+                        style={[styles.button, styles.profile]}
+                        onPress={() => onAddPressed(item)}>
+                        <Text style={styles.buttonText}>Add</Text>
+                    </TouchableOpacity>
+                  )
+                }
               </TouchableOpacity>
             )
           } 
@@ -202,7 +219,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   card: {
-    height: 160,
+    //height: 160,
     paddingTop: 10,
     paddingBottom: 10,
     marginTop: 5,
@@ -303,5 +320,6 @@ const styles = StyleSheet.create({
     
   },
 })
+
 
                   

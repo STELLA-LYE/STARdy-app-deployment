@@ -21,10 +21,7 @@ const formatDate = (ms) => {
     const sec = date.getSeconds();
     const time = date.getUTCDate();
 
-    //return `${day}/${month}/${year} - ${hrs}:${min}:${sec}`
-    return `${day}/${min}/${sec} - ${time}`
-
-
+    return `${day}/${month}/${year} - ${hrs}:${min}:${sec}`
 }
 
 const NoteDetail = (props) => {

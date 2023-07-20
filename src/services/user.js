@@ -2,6 +2,7 @@ import { setDoc, doc, collection, addDoc } from "firebase/firestore"
 import { authentication } from "../../config"
 import { db } from "../../config"
 import { saveMediaToStorage } from "./random"
+import { onAuthStateChanged } from "firebase/auth"
 
 
 
@@ -11,7 +12,7 @@ import { saveMediaToStorage } from "./random"
 export const saveUserProfileImage = (image) => new Promise((resolve, reject) => {
     saveMediaToStorage(image, `profileImage/${authentication.currentUser.uid}`)
         .then((downloadUrl) => {
-            setDoc(doc(db, "users", authentication.currentUser.email), {
+            setDoc(doc(db, "users", authentication.currentUser.uid), {
                 photoURL: downloadUrl
             }, { merge: true })
             .then(() => resolve(Date.now())) 
@@ -24,7 +25,7 @@ export const saveUserEvidence = (image, otherUserID, task) => new Promise((resol
     const path2 = Date.now();
     saveMediaToStorage(image, `evidence/${Date.now()}`)
         .then((downloadUrl) => {
-            const docref = doc(db, 'evidence', authentication.currentUser.email);
+            const docref = doc(db, 'evidence', authentication.currentUser.uid);
             const colRef = collection(docref, 'images');
             const chatSnap = addDoc(colRef, {
                 imageURL: downloadUrl,
@@ -36,7 +37,11 @@ export const saveUserEvidence = (image, otherUserID, task) => new Promise((resol
     })
 })
 
-export const fetchUserEvidence = () => {
-
-}
-
+export function getCurrentUser() {
+    return new Promise((resolve, reject) => {
+       const unsubscribe = onAuthStateChanged(authentication, user => {
+          unsubscribe();
+          resolve(user);
+       }, reject);
+    });
+  }

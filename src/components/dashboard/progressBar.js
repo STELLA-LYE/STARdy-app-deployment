@@ -3,24 +3,21 @@ import { useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authentication, db } from '../../../config';
-import { doc, getDoc, get, where, Filter, getDocs, query, collection, setDoc} from "firebase/firestore";
+import { doc, getDoc, get, where, Filter, getDocs, query, collection, setDoc, updateDoc} from "firebase/firestore";
 import { useFocusEffect } from '@react-navigation/native';
-
-
-
 
 
 const ProgressBar = ({ navigation }) => {
 
     const goToLeaderboard = () => {
-        Alert.alert('Leaderboard WIP')
         navigation.navigate('Leaderboard')
     }
 
     const [userXP, setUserXP] = useState(0);
     const [width, setWidth] = useState(0);
+    const [level, setLevel] = useState(0);
 
-    const userRef = doc(db, "users", authentication.currentUser.email);
+    const userRef = doc(db, "users", authentication.currentUser.uid);
     useFocusEffect(
         useCallback(() => {
             getDoc(userRef)
@@ -34,11 +31,26 @@ const ProgressBar = ({ navigation }) => {
     )
 
     useEffect(() => {
-        const percent = userXP / 1000 * 100;
+        const lvl = Math.floor(userXP / 1000) + 1;
+
+        const percent = userXP / (1000 * lvl) * 100;
             console.log('percent ' + percent)
             setWidth(percent + '%');
 
+        setLevel(lvl);
+
+        // setDoc(userRef, {
+        //     level: level
+        // }, {merge: true});
+
+        updateDoc(userRef, {
+            level: level
+        })
+
+
+
     }, [userXP])
+
 
     // useEffect(() => {
     //     
@@ -75,7 +87,7 @@ const ProgressBar = ({ navigation }) => {
                 //marginTop: -15,
                 left: 9,
                 top: 10,
-            }}>Level 2</Text>
+            }}>Level {level}</Text>
 
         
             
@@ -139,7 +151,7 @@ const styles=StyleSheet.create({
         borderRadius: 20,
         //position: 'absolute',
         top: 0,
-        width: 250
+        width: 230
         
     },
 })
